@@ -45,13 +45,14 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/24 19:26:02  gedra
+-- Wishbone bus utilities.
+--
 --
  
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.numeric_std.all;
-use IEEE.std_logic_arith.all;
-use IEEE.std_logic_textio.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 use std.textio.all;
 
 package wb_tb_pack is
@@ -59,12 +60,12 @@ package wb_tb_pack is
   constant WRITE_TIMEOUT : integer := 20;  -- Max cycles to wait during write operation
   constant READ_TIMEOUT : integer := 20;  -- Max cycles to wait during read operation
 
-  function str(slv: std_logic_vector) return string;
-  function chr(sl: std_logic) return character;
+  function int_2_hex (value: natural; width: natural) return string;
+  function slv_2_hex (value: std_logic_vector) return string;
   
-  procedure WB_write (
-    constant ADDRESS: in integer; 
-    constant DATA: in std_logic_vector;
+  procedure wb_write (
+    constant ADDRESS: in natural; 
+    constant DATA: in natural;
     signal wb_adr_o: out std_logic_vector;
     signal wb_dat_o: out std_logic_vector;
     signal wb_cyc_o: out std_logic;
@@ -73,8 +74,8 @@ package wb_tb_pack is
     signal wb_clk_i: in std_logic;
     signal wb_ack_i: in std_logic);
 
-  procedure WB_read (
-    constant ADDRESS: in integer;
+  procedure wb_read (
+    constant ADDRESS: in natural;
     variable READ_DATA : out std_logic_vector;
     signal wb_adr_o: out std_logic_vector;
     signal wb_dat_i: in std_logic_vector;
@@ -84,9 +85,9 @@ package wb_tb_pack is
     signal wb_clk_i: in std_logic;
     signal wb_ack_i: in std_logic);
 
-  procedure WB_check (
-    constant ADDRESS: in integer;
-    constant EXP_DATA : in std_logic_vector;
+  procedure wb_check (
+    constant ADDRESS: in natural;
+    constant EXP_DATA : in natural;
     signal wb_adr_o: out std_logic_vector;
     signal wb_dat_i: in std_logic_vector;
     signal wb_cyc_o: out std_logic;
@@ -95,48 +96,98 @@ package wb_tb_pack is
     signal wb_clk_i: in std_logic;
     signal wb_ack_i: in std_logic);
 
+  procedure message (
+    constant MSG: in string);
+
 end wb_tb_pack;
 
 package body wb_tb_pack is
 
--- converts std_logic into a character
-  function chr(sl: std_logic) return character is
-    variable c: character;
+-- convert natural to hex format. Number of digits must be specified
+  function int_2_hex (value: natural; width: natural) return string is
+    variable tmp: string(1 to width + 2);
+    variable digit: integer range 0 to 15;
+    variable invalue: integer;  
+    variable pos: integer;
   begin
-    case sl is
-      when 'U' => c:= 'U';
-      when 'X' => c:= 'X';
-      when '0' => c:= '0';
-      when '1' => c:= '1';
-      when 'Z' => c:= 'Z';
-      when 'W' => c:= 'W';
-      when 'L' => c:= 'L';
-      when 'H' => c:= 'H';
-      when '-' => c:= '-';
-    end case;
-    return c;
-  end chr;
-  
-  -- converts std_logic_vector into a string (binary base)
-  -- (this also takes care of the fact that the range of
-  --  a string is natural while a std_logic_vector may
-  --  have an integer range)
-  function str(slv: std_logic_vector) return string is
-    variable result : string (1 to slv'length);
-    variable r : integer;
+    tmp(1 to 2) := "0x";      
+    invalue := value;
+    FL: for i in 1 to width loop 
+      digit := invalue mod 16;
+      invalue := invalue / 16;
+      pos := 3 + width - i;
+      case digit is
+        when 0 => tmp(pos) := '0';
+        when 1 => tmp(pos) := '1';
+        when 2 => tmp(pos) := '2'; 
+        when 3 => tmp(pos) := '3'; 
+        when 4 => tmp(pos) := '4';
+        when 5 => tmp(pos) := '5';
+        when 6 => tmp(pos) := '6'; 
+        when 7 => tmp(pos) := '7';
+        when 8 => tmp(pos) := '8';
+        when 9 => tmp(pos) := '9';
+        when 10 => tmp(pos) := 'a'; 
+        when 11 => tmp(pos) := 'b';
+        when 12 => tmp(pos) := 'c';
+        when 13 => tmp(pos) := 'd';
+        when 14 => tmp(pos) := 'e'; 
+        when 15 => tmp(pos) := 'f';
+        when others => tmp(pos) := '?'; 
+      end case;
+    end loop FL;
+    return(tmp);        
+  end int_2_hex;
+
+  -- Convert std_logic_vector to hex format. 
+  function slv_2_hex (value: std_logic_vector) return string is
+    variable tmp: string(1 to value'length + 2);  
+    variable subdigit: std_logic_vector(3 downto 0);
+    variable digits, pos: integer;
+    variable actual_length: integer;  
+    variable ext_val: std_logic_vector(value'length + 3 downto 0);
   begin
-    r := 1;
-    for i in slv'range loop
-      result(r) := chr(slv(i));
-      r := r + 1;
-    end loop;
-    return result;
-  end str;
+    tmp(1 to 2) := "0x";     
+    ext_val(value'length - 1 downto 0) := value;
+    ext_val(value'length + 3 downto value'length) := (others => '0'); 
+    -- pad with zero's if length is not a factor of 4
+    if value'length mod 4 /= 0 then
+      actual_length := value'length + 4 - (value'length mod 4);
+    else
+      actual_length := value'length;  
+    end if;                           
+    digits := actual_length / 4;    
+    -- convert 4 and 4 bits into hex digits
+    F1: for i in digits downto 1 loop
+      subdigit(3 downto 0) := ext_val(i * 4 - 1 downto i * 4 - 4);                           
+      pos := 3 + digits - i;
+      case subdigit is
+        when "0000" => tmp(pos) := '0';
+        when "0001" => tmp(pos) := '1';
+        when "0010" => tmp(pos) := '2'; 
+        when "0011" => tmp(pos) := '3'; 
+        when "0100" => tmp(pos) := '4';
+        when "0101" => tmp(pos) := '5';
+        when "0110" => tmp(pos) := '6'; 
+        when "0111" => tmp(pos) := '7';
+        when "1000" => tmp(pos) := '8';
+        when "1001" => tmp(pos) := '9';
+        when "1010" => tmp(pos) := 'a'; 
+        when "1011" => tmp(pos) := 'b';
+        when "1100" => tmp(pos) := 'c';
+        when "1101" => tmp(pos) := 'd';
+        when "1110" => tmp(pos) := 'e'; 
+        when "1111" => tmp(pos) := 'f';
+        when others => tmp(pos) := '?';  
+      end case;
+    end loop F1;
+    return(tmp(1 to 2 + digits));
+  end slv_2_hex;    
   
 -- Classic Wishbone write cycle
-  procedure WB_write (
-    constant ADDRESS: in integer; 
-    constant DATA: in std_logic_vector;
+  procedure wb_write (
+    constant ADDRESS: in natural; 
+    constant DATA: in natural;
     signal wb_adr_o: out std_logic_vector;
     signal wb_dat_o: out std_logic_vector;
     signal wb_cyc_o: out std_logic;
@@ -144,22 +195,36 @@ package body wb_tb_pack is
     signal wb_we_o: out std_logic;
     signal wb_clk_i: in std_logic;
     signal wb_ack_i: in std_logic) is
-    --variable ResizeAdr : unsigned(wb_adr_o'high downto 0);
     variable txt : line;
-    --variable tmp : integer;
+    variable adr_width, dat_width : natural;
     constant WEAK_BUS: std_logic_vector(wb_adr_o'range) := (others => 'W');
     constant LOW_BUS: std_logic_vector(wb_dat_o'range) := (others => 'L');
   begin
+    -- determine best width for number printout
+    if wb_adr_o'length < 9 then
+      adr_width := 2;
+    elsif wb_adr_o'length < 17 and wb_adr_o'length > 8 then
+      adr_width := 4;
+    else
+      adr_width := 6;
+    end if;
+    if wb_dat_o'length < 9 then
+      dat_width := 2;
+    elsif wb_dat_o'length < 17 and wb_dat_o'length > 8 then
+      dat_width := 4;
+    else
+      dat_width := 8;
+    end if;
+    -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
     write(txt, "@");
     write(txt, now, right, 12);
     write(txt, " Wrote ");
-    write(txt, str(DATA));
-    write(txt, "b to addr. ");
-    write(txt, str(CONV_STD_LOGIC_VECTOR(ADDRESS, wb_adr_o'length)));
-    write(txt, "b ");
-    wb_adr_o <= CONV_STD_LOGIC_VECTOR(ADDRESS, wb_adr_o'length);
-    wb_dat_o <= DATA;
+    write(txt, int_2_hex(DATA, dat_width));
+    write(txt, " to addr. ");
+    write(txt, int_2_hex(ADDRESS, adr_width));
+    wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
+    wb_dat_o <= std_logic_vector(to_unsigned(DATA, wb_dat_o'length));
     wb_we_o <= '1';
     wb_cyc_o <= '1';
     wb_sel_o <= '1';
@@ -186,8 +251,8 @@ package body wb_tb_pack is
   end;
 
 -- Classic Wishbone read cycle
-  procedure WB_read (
-    constant ADDRESS: in integer;
+  procedure wb_read (
+    constant ADDRESS: in natural;
     variable READ_DATA : out std_logic_vector;
     signal wb_adr_o: out std_logic_vector;
     signal wb_dat_i: in std_logic_vector;
@@ -198,13 +263,29 @@ package body wb_tb_pack is
     signal wb_ack_i: in std_logic) is
     variable txt : line;
     variable tout : integer;
+    variable adr_width, dat_width : natural;
     constant WEAK_BUS: std_logic_vector(wb_adr_o'range) := (others => 'W');
   begin
-    -- start cycle
+    -- determine best width for number printout
+    if wb_adr_o'length < 9 then
+      adr_width := 2;
+    elsif wb_adr_o'length < 17 and wb_adr_o'length > 8 then
+      adr_width := 4;
+    else
+      adr_width := 6;
+    end if;
+    if wb_dat_i'length < 9 then
+      dat_width := 2;
+    elsif wb_dat_i'length < 17 and wb_dat_i'length > 8 then
+      dat_width := 4;
+    else
+      dat_width := 8;
+    end if;
+    -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
     write(txt, "@");
     write(txt, now, right, 12);
-    wb_adr_o <= CONV_STD_LOGIC_VECTOR(ADDRESS, wb_adr_o'length);
+    wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
     wb_we_o <= '0';
     wb_cyc_o <= '1';
     wb_sel_o <= '1';
@@ -226,11 +307,10 @@ package body wb_tb_pack is
     end if;
     --READ_DATA := wb_dat_i;
     if tout = 0 then
-      write(txt, " Read  ");
-      write(txt, str(wb_dat_i));
-      write(txt, "b from addr. ");
-      write(txt, str(CONV_STD_LOGIC_VECTOR(ADDRESS, wb_adr_o'length)));
-      write(txt, "b ");
+      write(txt, " Read ");
+      write(txt, slv_2_hex(wb_dat_i));
+      write(txt, " from addr. ");
+      write(txt, int_2_hex(ADDRESS, adr_width));
       writeline(OUTPUT, txt);
     end if;
     -- release bus
@@ -241,9 +321,9 @@ package body wb_tb_pack is
   end;
 
 -- Check: A read operation followed by a data compare
-  procedure WB_check (
-    constant ADDRESS: in integer;
-    constant EXP_DATA : in std_logic_vector;
+  procedure wb_check (
+    constant ADDRESS: in natural;
+    constant EXP_DATA : in natural;
     signal wb_adr_o: out std_logic_vector;
     signal wb_dat_i: in std_logic_vector;
     signal wb_cyc_o: out std_logic;
@@ -253,14 +333,30 @@ package body wb_tb_pack is
     signal wb_ack_i: in std_logic) is
     variable txt : line;
     variable tout : integer;
+    variable adr_width, dat_width : natural;
     constant WEAK_BUS: std_logic_vector(wb_adr_o'range) := (others => 'W');
-    variable RData : std_logic_vector(EXP_DATA'left downto 0);
+    variable RData : std_logic_vector(wb_dat_i'left downto 0);
   begin
-    -- start cycle
+    -- determine best width for number printout
+    if wb_adr_o'length < 9 then
+      adr_width := 2;
+    elsif wb_adr_o'length < 17 and wb_adr_o'length > 8 then
+      adr_width := 4;
+    else
+      adr_width := 6;
+    end if;
+    if wb_dat_i'length < 9 then
+      dat_width := 2;
+    elsif wb_dat_i'length < 17 and wb_dat_i'length > 8 then
+      dat_width := 4;
+    else
+      dat_width := 8;
+    end if;
+    -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
     write(txt, "@");
     write(txt, now, right, 12);
-    wb_adr_o <= CONV_STD_LOGIC_VECTOR(ADDRESS, wb_adr_o'length);
+    wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
     wb_we_o <= '0';
     wb_cyc_o <= '1';
     wb_sel_o <= '1';
@@ -280,22 +376,20 @@ package body wb_tb_pack is
         end if;    
       end loop;
     end if;
-    --READ_DATA := wb_dat_i;
     if tout = 0 then
-      if wb_dat_i = EXP_DATA then
+      if wb_dat_i = std_logic_vector(to_unsigned(EXP_DATA, wb_dat_i'length)) then
         write(txt, " Check ");
-        write(txt, str(wb_dat_i));
-        write(txt, "b at addr. ");
-        write(txt, str(CONV_STD_LOGIC_VECTOR(ADDRESS, wb_adr_o'length)));
-        write(txt, "b ");
+        write(txt, slv_2_hex(wb_dat_i));
+        write(txt, " at addr. ");
+        write(txt, int_2_hex(ADDRESS, adr_width));
+        write(txt, " - OK!");
       else
         write(txt, " Check failed at addr. ");
-        write(txt, str(CONV_STD_LOGIC_VECTOR(ADDRESS, wb_adr_o'length)));
-        write(txt, "b! Got ");
-        write(txt, str(wb_dat_i));
-        write(txt, "b, expected ");
-        write(txt, str(EXP_DATA));
-        write(txt, "b");
+        write(txt, int_2_hex(ADDRESS, adr_width));
+        write(txt, "! Got ");
+        write(txt, slv_2_hex(wb_dat_i));
+        write(txt, ", expected ");
+        write(txt, int_2_hex(EXP_DATA, dat_width));
       end if;
         writeline(OUTPUT, txt);
     end if;
@@ -308,6 +402,17 @@ package body wb_tb_pack is
     --  write (txt, string'("Error: WB_check failed!"));
     --  writeline(OUTPUT, txt);
     --end if;
+  end;
+
+-- display a message with time stamp
+  procedure message (
+    constant MSG: in string) is
+  variable txt : line;
+  begin
+    write(txt, "@");
+    write(txt, now, right, 12);
+    write(txt, " -- " & MSG);
+    writeline(OUTPUT, txt);
   end;  
   
 end wb_tb_pack;
