@@ -46,37 +46,40 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/06 15:43:02  gedra
+-- Early version of the bi-phase mark decoder.
+--
 --
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 entity rx_phase_det is             
-  generic (WISH_BONE_FREQ: natural := 33);   -- WishBone frequency in MHz
+  generic (WISHBONE_FREQ: natural := 33);   -- WishBone frequency in MHz
   port (
-    wb_clk_i: in std_logic;
-    rxen: in std_logic;
-    spdif: in std_logic;
-    lock: out std_logic;
-    rx_data: out std_logic;
-    rx_data_en: out std_logic;
-    rx_block_start: out std_logic;
-    rx_frame_start: out std_logic;
-    rx_channel_a: out std_logic;
-    rx_error: out std_logic;
-    ud_a_en: out std_logic;              -- user data ch. A enable
-    ud_b_en: out std_logic;              -- user data ch. B enable
-    cs_a_en: out std_logic;              -- channel status ch. A enable
-    cs_b_en: out std_logic);             -- channel status ch. B enable);            
+    wb_clk_i: in std_logic;             -- wishbone clock
+    rxen: in std_logic;                 -- phase detector enable
+    spdif: in std_logic;                -- SPDIF input signal
+    lock: out std_logic;                -- true if locked to spdif input
+    rx_data: out std_logic;             -- recevied data
+    rx_data_en: out std_logic;          -- received data enable
+    rx_block_start: out std_logic;      -- start-of-block pulse
+    rx_frame_start: out std_logic;      -- start-of-frame pulse
+    rx_channel_a: out std_logic;        -- 1 if channel A frame is recevied
+    rx_error: out std_logic;            -- signal error was detected
+    ud_a_en: out std_logic;             -- user data ch. A enable
+    ud_b_en: out std_logic;             -- user data ch. B enable
+    cs_a_en: out std_logic;             -- channel status ch. A enable
+    cs_b_en: out std_logic);            -- channel status ch. B enable);            
 end rx_phase_det;
 
 architecture rtl of rx_phase_det is
 
   constant TRANSITIONS : integer := 40;
   constant FRAMES_FOR_LOCK : integer := 3;
-  signal maxpulse, maxp, mp_cnt: integer range 0 to 16 * WISH_BONE_FREQ;
-  signal last_cnt, max_thres : integer range 0 to 16 * WISH_BONE_FREQ;
-  signal minpulse, minp, min_thres: integer range 0 to 8 * WISH_BONE_FREQ;
+  signal maxpulse, maxp, mp_cnt: integer range 0 to 16 * WISHBONE_FREQ;
+  signal last_cnt, max_thres : integer range 0 to 16 * WISHBONE_FREQ;
+  signal minpulse, minp, min_thres: integer range 0 to 8 * WISHBONE_FREQ;
   signal zspdif, spdif_in, zspdif_in, trans, ztrans : std_logic;
   signal trans_cnt : integer range 0 to TRANSITIONS;
   signal valid, p_long, p_short: std_logic;
@@ -132,7 +135,7 @@ begin
           end if;
         else
           trans <= '0';
-          if mp_cnt < 16 * WISH_BONE_FREQ then
+          if mp_cnt < 16 * WISHBONE_FREQ then
             mp_cnt <= mp_cnt + 1;
           end if;
         end if;
@@ -146,7 +149,7 @@ begin
             maxpulse <= maxp;
             maxp <= 0;
             minpulse <= minp;
-            minp <= 8 * WISH_BONE_FREQ;
+            minp <= 8 * WISHBONE_FREQ;
             min_thres <= maxp / 2;
             if maxp < 11 then
               max_thres <= maxp - 1;
