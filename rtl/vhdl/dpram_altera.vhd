@@ -45,12 +45,17 @@
 --
 -- CVS Revision History
 --
--- $Log: not supported by cvs2svn $ 
+-- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/18 18:40:04  gedra
+-- Alternate dual port memory implementation for Altera FPGA's.
+-- 
 --
 
 library ieee;
 use ieee.std_logic_1164.all; 
-use ieee.std_logic_unsigned.all;
+--use ieee.std_logic_unsigned.all;
+library lpm;
+use lpm.lpm_components.all;
 
 entity dpram is
   generic (DATA_WIDTH: positive;
@@ -66,9 +71,7 @@ entity dpram is
     dout: out std_logic_vector(DATA_WIDTH - 1 downto 0));
 end dpram;    
 
---library lpm;
---USE lpm.lpm_components.all;
-architecture rtl of dpram is
+architecture altera of dpram is
   
 component lpm_ram_dp
   generic ( LPM_WIDTH: positive;
@@ -95,7 +98,7 @@ begin
 
   one <= '1';
 
-  RAM: lpm_ram_dp 
+  ram: lpm_ram_dp 
     generic map(LPM_WIDTH => DATA_WIDTH,
                 LPM_WIDTHAD => RAM_WIDTH,
                 LPM_NUMWORDS => 2**(RAM_WIDTH - 1))
@@ -110,4 +113,4 @@ begin
               wren => wr_en,
               q => dout);    
   
-end rtl;
+end altera;
