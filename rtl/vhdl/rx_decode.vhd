@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/16 19:04:09  gedra
+-- Fixed a few bugs.
+--
 -- Revision 1.1  2004/06/13 18:07:47  gedra
 -- Frame decoder and sample extractor
 --                        
@@ -53,7 +56,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_arith.all;
+use ieee.numeric_std.all;
 
 entity rx_decode is             
   generic (DATA_WIDTH: integer range 16 to 32;
@@ -77,7 +80,7 @@ entity rx_decode is
     rx_channel_a: in std_logic; 
     wr_en: out std_logic;
     wr_addr: out std_logic_vector(ADDR_WIDTH - 2 downto 0);
-    wr_data: out std_logic_vector(DATA_WIDTH -1 downto 0);
+    wr_data: out std_logic_vector(DATA_WIDTH - 1 downto 0);
     stat_paritya: out std_logic;
     stat_parityb: out std_logic;
     stat_lsbf: out std_logic;
@@ -91,7 +94,7 @@ architecture rtl of rx_decode is
   signal sampst : samp_states;
   signal bit_cnt, par_cnt : integer range 0 to 31;
   signal samp_start : integer range 0 to 15;
-  signal tmp_data : std_logic_vector(DATA_WIDTH - 6 downto 0);
+  signal tmp_data : std_logic_vector(26 downto 0);
   signal tmp_stat : std_logic_vector(4 downto 0);
   signal valid, next_is_a, blk_start : std_logic;
   
@@ -128,7 +131,7 @@ begin
             sampst <= CHA_SYNC;
           end if;
         when CHA_SYNC =>
-          wr_addr <= CONV_STD_LOGIC_VECTOR(adr_cnt, ADDR_WIDTH - 1);
+          wr_addr <= std_logic_vector(to_unsigned(adr_cnt, ADDR_WIDTH - 1));
           wr_en <= '0';
           bit_cnt <= 0;
           valid <= '0';
@@ -137,7 +140,7 @@ begin
           stat_parityb <= '0';
           stat_lsbf <= '0';
           stat_hsbf <= '0';
-          tmp_data(DATA_WIDTH - 6 downto 0) <= (others => '0');
+          tmp_data(26 downto 0) <= (others => '0');
           if rx_block_start = '1' and conf_blken = '1' then
             blk_start <= '1';
           end if;

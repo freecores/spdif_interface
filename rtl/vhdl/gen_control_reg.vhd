@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/06/06 15:42:19  gedra
+-- Cleaned up lint warnings.
+--
 -- Revision 1.2  2004/06/04 15:55:07  gedra
 -- Cleaned up lint warnings.
 --
@@ -53,9 +56,8 @@
 --
 --
 
-library IEEE;
-use IEEE.std_logic_1164.all; 
-use IEEE.std_logic_arith.all;
+library ieee;
+use ieee.std_logic_1164.all; 
 
 entity gen_control_reg is	 
   generic (DATA_WIDTH: integer;

@@ -45,15 +45,17 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/24 19:25:03  gedra
+-- Added data output.
+--
 -- Revision 1.1  2004/06/23 18:09:57  gedra
 -- Wishbone bus cycle decoder.
 --
 --
 
-library IEEE;
-use IEEE.std_logic_1164.all;
-use IEEE.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity rx_wb_decoder is	 
   generic (DATA_WIDTH: integer;
@@ -169,7 +171,7 @@ begin
   end process DREG;
   
 -- sample memory read address. This needs special attention due to read latency
-  mem_addr <= CONV_STD_LOGIC_VECTOR(acnt, ADDR_WIDTH - 1) when
+  mem_addr <= std_logic_vector(to_unsigned(acnt, ADDR_WIDTH - 1)) when
               wb_cti_i = "010" and wb_we_i = '0' and iack = '1' and
               wb_bte_i = "00" else wb_adr_i(ADDR_WIDTH - 2 downto 0);
   
@@ -185,7 +187,7 @@ begin
           if wb_adr_i = all_ones then
             acnt <= 0;
           else
-            acnt <= CONV_INTEGER(wb_adr_i) + 1;
+            acnt <= to_integer(unsigned(wb_adr_i)) + 1;
           end if;
         else
           if acnt < 2**(ADDR_WIDTH - 1) - 1 then
@@ -222,13 +224,13 @@ begin
   CR32: if DATA_WIDTH = 32 generate
     CRST: for k in 0 to 7 generate
       ch_st_cap_rd(k) <= '1' when ird = '1' and wb_adr_i(6 downto 4) = "001" 
-                         and wb_adr_i(3 downto 0) = CONV_STD_LOGIC_VECTOR(2*k,4)
+                         and wb_adr_i(3 downto 0) = std_logic_vector(to_unsigned(2*k,4))
                          else '0';
       ch_st_cap_wr(k) <= '1' when iwr = '1' and wb_adr_i(6 downto 4) = "001"
-                         and wb_adr_i(3 downto 0) = CONV_STD_LOGIC_VECTOR(2*k,4)
+                         and wb_adr_i(3 downto 0) = std_logic_vector(to_unsigned(2*k,4))
                          else '0';
       ch_st_data_rd(k) <= '1' when ird = '1' and wb_adr_i(6 downto 4) = "001"
-                          and wb_adr_i(3 downto 0) = CONV_STD_LOGIC_VECTOR(2*k+1,4)
+                          and wb_adr_i(3 downto 0) = std_logic_vector(to_unsigned(2*k+1,4))
                           else '0';
     end generate CRST;
   end generate CR32;

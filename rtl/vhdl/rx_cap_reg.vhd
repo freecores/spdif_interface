@@ -45,11 +45,14 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/05 17:16:46  gedra
+-- Channel status/user data capture register
+--
 --
 
-library IEEE;
-use IEEE.std_logic_1164.all; 
-use IEEE.std_logic_unsigned.all;
+library ieee;
+use ieee.std_logic_1164.all; 
+use ieee.numeric_std.all;
 use work.rx_package.all;
 
 entity rx_cap_reg is	 
@@ -98,10 +101,10 @@ begin
       ctrl_dout => cap_ctrl_dout,
       ctrl_bits => cap_ctrl_bits);
   
-  bitlen <= CONV_INTEGER(cap_ctrl_bits(5 downto 0));
+  bitlen <= to_integer(unsigned(cap_ctrl_bits(5 downto 0)));
   chid <= cap_ctrl_bits(6);
   cdata <= cap_ctrl_bits(7);
-  bitpos <= CONV_INTEGER(cap_ctrl_bits(15 downto 8));
+  bitpos <= to_integer(unsigned(cap_ctrl_bits(15 downto 8)));
   
 -- capture data register
   CDAT: process (clk, rst)
@@ -158,7 +161,7 @@ begin
             if cap_len = bitlen and compared = '0' then
               compared <= '1';
               -- event generated if captured bits differ
-              if CONV_INTEGER(cap_reg) /= CONV_INTEGER(cap_new) then  
+              if cap_reg /= cap_new then
                 cap_evt <= '1';
               end if;
               cap_reg <= cap_new;

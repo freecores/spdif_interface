@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.6  2004/06/23 18:10:17  gedra
+-- Added Wishbone bus cycle decoder.
+--
 -- Revision 1.5  2004/06/16 19:03:45  gedra
 -- Changed status reg. declaration
 --
@@ -196,7 +199,7 @@ package rx_package is
       rx_channel_a: in std_logic; 
       wr_en: out std_logic;
       wr_addr: out std_logic_vector(ADDR_WIDTH - 2 downto 0);
-      wr_data: out std_logic_vector(DATA_WIDTH downto 0);
+      wr_data: out std_logic_vector(DATA_WIDTH - 1 downto 0);
       stat_paritya: out std_logic;
       stat_parityb: out std_logic;
       stat_lsbf: out std_logic;
@@ -233,5 +236,5 @@ package rx_package is
       ch_st_cap_wr: out std_logic_vector(7 downto 0);  -- Ch. status cap. write
       ch_st_data_rd: out std_logic_vector(7 downto 0)); -- Ch. status data read
   end component;
-  
+
 end rx_package;

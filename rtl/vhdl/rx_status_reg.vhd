@@ -45,14 +45,16 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/16 19:03:10  gedra
+-- Added channel status decoding.
+--
 -- Revision 1.1  2004/06/05 17:17:12  gedra
 -- Recevier status register
 --
 --
 
-library IEEE;
-use IEEE.std_logic_1164.all; 
-use IEEE.std_logic_arith.all;
+library ieee;
+use ieee.std_logic_1164.all; 
 
 entity rx_status_reg is	 
   generic (DATA_WIDTH: integer);

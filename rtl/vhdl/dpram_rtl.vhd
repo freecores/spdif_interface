@@ -48,6 +48,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/10 18:57:36  gedra
+-- Cleaned up lint warnings.
+--
 -- Revision 1.1  2004/06/09 19:24:31  gedra
 -- Generic dual port ram model.
 --
@@ -55,7 +58,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all; 
-use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 entity dpram is
   generic (DATA_WIDTH: positive;
@@ -89,7 +92,7 @@ begin
   begin
     if rising_edge(clk) then
       if wr_en = '1' then
-        memory(CONV_INTEGER(wr_addr)) <= din;
+        memory(to_integer(unsigned(wr_addr))) <= din;
       end if;
     end if;
   end process;
@@ -98,7 +101,7 @@ begin
   begin
     if rising_edge(clk) then
       if rd_en = '1' then
-        dout <= memory(CONV_INTEGER(rd_addr));
+        dout <= memory(to_integer(unsigned(rd_addr)));
       end if;
     end if;
   end process;

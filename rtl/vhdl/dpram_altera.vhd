@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/19 09:55:19  gedra
+-- Delint'ed and changed name of architecture.
+--
 -- Revision 1.1  2004/06/18 18:40:04  gedra
 -- Alternate dual port memory implementation for Altera FPGA's.
 -- 
@@ -53,7 +56,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all; 
---use ieee.std_logic_unsigned.all;
+
 library lpm;
 use lpm.lpm_components.all;
 
@@ -101,7 +104,7 @@ begin
   ram: lpm_ram_dp 
     generic map(LPM_WIDTH => DATA_WIDTH,
                 LPM_WIDTHAD => RAM_WIDTH,
-                LPM_NUMWORDS => 2**(RAM_WIDTH - 1))
+                LPM_NUMWORDS => 2**RAM_WIDTH)
     port map (data => din,
               rdaddress => rd_addr,
               wraddress => wr_addr,
