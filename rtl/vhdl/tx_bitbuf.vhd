@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/07/14 17:58:19  gedra
+-- Transmitter channel status buffer.
+--
 --
 --
 
@@ -76,8 +79,8 @@ begin
         buf_data_a(191 downto 0) <= (others => '0');
         buf_data_b(191 downto 0) <= (others => '0');
       elsif rising_edge(wb_clk_i) then
-        if buf_wr = '1'  then
-          buf_data_a(8*to_integer(unsigned(wb_adr_i)) + 7 downto
+        if buf_wr = '1' and to_integer(unsigned(wb_adr_i)) < 24 then
+          buf_data_a(8*to_integer(unsigned(wb_adr_i)) + 7 downto to
                      8*to_integer(unsigned(wb_adr_i))) <= wb_dat_i(7 downto 0);
           buf_data_b(8*to_integer(unsigned(wb_adr_i)) + 7 downto
                      8*to_integer(unsigned(wb_adr_i))) <= wb_dat_i(15 downto 8);
