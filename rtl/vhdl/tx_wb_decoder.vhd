@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/07/17 17:20:50  gedra
+-- Changed address of channel status buffers.
+--
 -- Revision 1.2  2004/07/14 17:59:28  gedra
 -- Changed write signal for status buffers.
 --
@@ -173,23 +176,23 @@ begin
 -- read and write strobe generation
   
   version_rd <= '1' when wb_adr_i(6 downto 0) = REG_TXVERSION and ird = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   config_rd <= '1' when wb_adr_i(6 downto 0) = REG_TXCONFIG and ird = '1'
-               else '0';
+               and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   config_wr <= '1' when wb_adr_i(6 downto 0) = REG_TXCONFIG and iwr = '1'
-               else '0';
+               and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   chstat_rd <= '1' when wb_adr_i(6 downto 0) = REG_TXCHSTAT and ird = '1'
-               else '0';
+               and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   chstat_wr <= '1' when wb_adr_i(6 downto 0) = REG_TXCHSTAT and iwr = '1'
-               else '0';
+               and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   intmask_rd <= '1' when wb_adr_i(6 downto 0) = REG_TXINTMASK and ird = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   intmask_wr <= '1' when wb_adr_i(6 downto 0) = REG_TXINTMASK and iwr = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   intstat_rd <= '1' when wb_adr_i(6 downto 0) = REG_TXINTSTAT and ird = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   intstat_wr <= '1' when wb_adr_i(6 downto 0) = REG_TXINTSTAT and iwr = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   mem_wr <= '1' when wb_adr_i(ADDR_WIDTH - 1) = '1' and iwr = '1' else '0';
 
 -- user data/ch. status register write strobes

@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/06/26 14:14:47  gedra
+-- Converted to numeric_std and fixed a few bugs.
+--
 -- Revision 1.2  2004/06/24 19:25:03  gedra
 -- Added data output.
 --
@@ -203,21 +206,21 @@ begin
 -- read and write strobe generation
   
   version_rd <= '1' when wb_adr_i(6 downto 0) = REG_RXVERSION and ird = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   config_rd <= '1' when wb_adr_i(6 downto 0) = REG_RXCONFIG and ird = '1'
-               else '0';
+               and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   config_wr <= '1' when wb_adr_i(6 downto 0) = REG_RXCONFIG and iwr = '1'
-               else '0';
+               and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   status_rd <= '1' when wb_adr_i(6 downto 0) = REG_RXSTATUS and ird = '1'
-               else '0';
+               and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   intmask_rd <= '1' when wb_adr_i(6 downto 0) = REG_RXINTMASK and ird = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   intmask_wr <= '1' when wb_adr_i(6 downto 0) = REG_RXINTMASK and iwr = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   intstat_rd <= '1' when wb_adr_i(6 downto 0) = REG_RXINTSTAT and ird = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   intstat_wr <= '1' when wb_adr_i(6 downto 0) = REG_RXINTSTAT and iwr = '1'
-                else '0';
+                and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
   mem_rd <= '1' when wb_adr_i(ADDR_WIDTH - 1) = '1' and ird = '1' else '0';
 
 -- capture register strobes
@@ -225,13 +228,13 @@ begin
     CRST: for k in 0 to 7 generate
       ch_st_cap_rd(k) <= '1' when ird = '1' and wb_adr_i(6 downto 4) = "001" 
                          and wb_adr_i(3 downto 0) = std_logic_vector(to_unsigned(2*k,4))
-                         else '0';
+                         and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
       ch_st_cap_wr(k) <= '1' when iwr = '1' and wb_adr_i(6 downto 4) = "001"
                          and wb_adr_i(3 downto 0) = std_logic_vector(to_unsigned(2*k,4))
-                         else '0';
+                         and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
       ch_st_data_rd(k) <= '1' when ird = '1' and wb_adr_i(6 downto 4) = "001"
                           and wb_adr_i(3 downto 0) = std_logic_vector(to_unsigned(2*k+1,4))
-                          else '0';
+                          and wb_adr_i(ADDR_WIDTH - 1) = '0' else '0';
     end generate CRST;
   end generate CR32;
   CR16: if DATA_WIDTH = 16 generate
