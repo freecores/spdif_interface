@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/06/10 18:57:36  gedra
+-- Cleaned up lint warnings.
+--
 -- Revision 1.2  2004/06/09 19:24:50  gedra
 -- Added dual port ram.
 --
@@ -127,7 +130,7 @@ package rx_package is
   end component;
 
   component rx_phase_det
-    generic (WISH_BONE_FREQ: natural := 33);   -- WishBone frequency in MHz
+    generic (WISHBONE_FREQ: natural := 33);   -- WishBone frequency in MHz
     port (
       wb_clk_i: in std_logic;
       rxen: in std_logic;
@@ -157,6 +160,35 @@ package rx_package is
       wr_addr: in std_logic_vector(RAM_WIDTH - 1 downto 0);
       rd_addr: in std_logic_vector(RAM_WIDTH - 1 downto 0);
       dout: out std_logic_vector(DATA_WIDTH - 1 downto 0));
-  end component; 
+  end component;
+
+  component rx_decode 
+    generic (DATA_WIDTH: integer range 16 to 32;
+             ADDR_WIDTH: integer range 8 to 64);   
+    port (
+      wb_clk_i: in std_logic;
+      conf_rxen: in std_logic;
+      conf_sample: in std_logic;
+      conf_valid: in std_logic;
+      conf_mode: in std_logic_vector(3 downto 0);
+      conf_blken: in std_logic;
+      conf_valen: in std_logic;
+      conf_useren: in std_logic;
+      conf_staten: in std_logic;
+      conf_paren: in std_logic;
+      lock: in std_logic;
+      rx_data: in std_logic;
+      rx_data_en: in std_logic;
+      rx_block_start: in std_logic;
+      rx_frame_start: in std_logic;
+      rx_channel_a: in std_logic; 
+      wr_en: out std_logic;
+      wr_addr: out std_logic_vector(ADDR_WIDTH - 2 downto 0);
+      wr_data: out std_logic_vector(DATA_WIDTH downto 0);
+      stat_paritya: out std_logic;
+      stat_parityb: out std_logic;
+      stat_lsbf: out std_logic;
+      stat_hsbf: out std_logic);
+  end component;
   
 end rx_package;
