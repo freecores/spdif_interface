@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/03 17:51:41  gedra
+-- Receiver version register.
+--
 --
 
 library IEEE;
@@ -52,32 +55,32 @@ use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 
 entity rx_ver_reg is	 
-  generic (DataWidth: integer;
-           AddrWidth: integer;
-           ChStCapture: integer);
+  generic (DATA_WIDTH: integer;
+           ADDR_WIDTH: integer;
+           CH_ST_CAPTURE: integer);
   port (
     ver_rd: in std_logic; -- version register read
-    ver_dout: out std_logic_vector(DataWidth - 1 downto 0)); -- read data
+    ver_dout: out std_logic_vector(DATA_WIDTH - 1 downto 0)); -- read data
 end rx_ver_reg;
 
 architecture rtl of rx_ver_reg is
 
-  signal version : std_logic_vector(DataWidth - 1 downto 0);
+  signal version : std_logic_vector(DATA_WIDTH - 1 downto 0);
 
 begin
   ver_dout <= version when ver_rd = '1' else (others => '0');
 
   -- version vector generation
   version(3 downto 0) <= "0001";        -- version 1
-  G32: if DataWidth = 32 generate
+  G32: if DATA_WIDTH = 32 generate
     version(4) <= '1';
     version(31 downto 20) <= (others => '0');
-    version(19 downto 16) <= CONV_STD_LOGIC_VECTOR(ChStCapture, 4);
+    version(19 downto 16) <= CONV_STD_LOGIC_VECTOR(CH_ST_CAPTURE, 4);
   end generate G32;
-  G16: if DataWidth = 16 generate
+  G16: if DATA_WIDTH = 16 generate
     version(4) <= '0';
   end generate G16;
-  version(11 downto 5) <= CONV_STD_LOGIC_VECTOR(AddrWidth, 7);
+  version(11 downto 5) <= CONV_STD_LOGIC_VECTOR(ADDR_WIDTH, 7);
   version(15 downto 12) <= (others => '0');
  
 end rtl;

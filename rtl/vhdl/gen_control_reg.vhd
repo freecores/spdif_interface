@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/03 17:47:17  gedra
+-- Generic control register. Used in both recevier and transmitter.
+--
 --
 
 library IEEE;
@@ -52,31 +55,31 @@ use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 
 entity gen_control_reg is	 
-  generic (DataWidth: integer;
-           ActiveBitsMask: std_logic_vector); -- note that this vector is (0 to xx), reverse order
-  port (
+  generic (DATA_WIDTH: integer;
+           ACTIVE_BIT_MASK: std_logic_vector); -- note that this vector is (0 to xx),
+  port (                                       -- reverse order
     clk: in std_logic;	 -- clock  
     rst: in std_logic; -- reset
     ctrl_wr: in std_logic; -- control register write	
     ctrl_rd: in std_logic; -- control register read
-    ctrl_din: in std_logic_vector(DataWidth - 1 downto 0); -- write data
-    ctrl_dout: out std_logic_vector(DataWidth - 1 downto 0); -- read data
-    ctrl_bits: out std_logic_vector(DataWidth - 1 downto 0)); -- control bits
+    ctrl_din: in std_logic_vector(DATA_WIDTH - 1 downto 0); -- write data
+    ctrl_dout: out std_logic_vector(DATA_WIDTH - 1 downto 0); -- read data
+    ctrl_bits: out std_logic_vector(DATA_WIDTH - 1 downto 0)); -- control bits
 end gen_control_reg;
 
 architecture rtl of gen_control_reg is
 
-  signal ctrl_internal, BitMask: std_logic_vector(DataWidth - 1 downto 0);
+  signal ctrl_internal: std_logic_vector(DATA_WIDTH - 1 downto 0);
 
 begin
-	
+
   ctrl_dout <= ctrl_internal when ctrl_rd = '1' else (others => '0');	  
   ctrl_bits <= ctrl_internal;
   
 -- control register generation
---BitMask <= CONV_STD_LOGIC_VECTOR(ActiveBitsMask, ctrl_din'length);
-  CTRLREG: for k in ctrl_din'range generate  
-    ACTIVE: if  ActiveBitsMask(k) = '1' generate		 -- active bits can be written to
+  CTRLREG: for k in ctrl_din'range generate
+    -- active bits can be written to
+    ACTIVE: if  ACTIVE_BIT_MASK(k) = '1' generate   
       CBIT: process (clk, rst)
       begin		 
         if rst = '1' then
@@ -89,10 +92,11 @@ begin
           end if;	  
         end if;
       end process CBIT;			 	
-    end generate;	 
-    INACTIVE: if ActiveBitsMask(k) = '0' generate	-- inactive bits are always 0
+    end generate ACTIVE;
+    -- inactive bits are always 0
+    INACTIVE: if ACTIVE_BIT_MASK(k) = '0' generate  
       ctrl_internal(k) <= '0';
-    end generate;
-  end generate;
+    end generate INACTIVE;
+  end generate CTRLREG;
   
 end rtl;

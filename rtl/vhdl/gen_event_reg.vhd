@@ -45,29 +45,32 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/03 17:49:26  gedra
+-- Generic event register. Used in both receiver and transmitter.
+--
 --
  
 library IEEE;
 use IEEE.std_logic_1164.all;
 
 entity gen_event_reg is	 
-  generic (DataWidth: integer:=32);	
+  generic (DATA_WIDTH: integer:=32);	
   port (
     clk: in std_logic;	 -- clock  
     rst: in std_logic; -- reset
     evt_wr: in std_logic; -- event register write	
     evt_rd: in std_logic; -- event register read
-    evt_din: in std_logic_vector(DataWidth - 1 downto 0); -- write data
-    evt_dout: out std_logic_vector(DataWidth - 1 downto 0); -- read data
-    event: in std_logic_vector(DataWidth - 1 downto 0); -- event vector
-    evt_mask: in std_logic_vector(DataWidth - 1 downto 0); -- irq mask
+    evt_din: in std_logic_vector(DATA_WIDTH - 1 downto 0); -- write data
+    event: in std_logic_vector(DATA_WIDTH - 1 downto 0); -- event vector
+    evt_mask: in std_logic_vector(DATA_WIDTH - 1 downto 0); -- irq mask
     evt_en: in std_logic;               -- irq enable
+    evt_dout: out std_logic_vector(DATA_WIDTH - 1 downto 0); -- read data
     evt_irq: out std_logic); -- interrupt  request
 end gen_event_reg;
 
 architecture rtl of gen_event_reg is
 
-  signal evt_internal, zero: std_logic_vector(DataWidth - 1 downto 0);
+  signal evt_internal, zero: std_logic_vector(DATA_WIDTH - 1 downto 0);
 
 begin
 	
@@ -75,8 +78,9 @@ begin
   zero <= (others => '0');
   
 -- IRQ generation:
--- IRQ signal will pulse low when writing to the event register. This will capture situations
--- when not all active events are cleared or an event happens at the same time as it is cleared.
+-- IRQ signal will pulse low when writing to the event register. This will
+-- capture situations when not all active events are cleared or an event happens
+-- at the same time as it is cleared.
   IR: process (clk)
   begin 
     if rising_edge(clk) then
@@ -104,6 +108,6 @@ begin
         end if;	  
       end if;
     end process EBIT;			 	
-  end generate;
+  end generate EVTREG;
   
 end rtl;
