@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/26 14:12:51  gedra
+-- Top level test bench for receiver. NB! Not complete.
+--
 --
  
 library ieee;
@@ -97,7 +100,12 @@ architecture behav of tb_rx_spdif is
   signal wb_adr_o : std_logic_vector(15 downto 0);
   signal wb_dat_i, wb_dat_o : std_logic_vector(31 downto 0);
   signal wb_stb_16bit_rx : std_logic;
-
+  constant RX_VERSION : natural := 16#1000#;
+  constant RX_CONFIG  : natural := 16#1001#;
+  constant RX_STATUS  : natural := 16#1002#;
+  constant RX_INTMASK : natural := 16#1003#;
+  constant RX_INTSTAT : natural := 16#1004#;
+  
 begin
 
 -- Minimal SPDIF recevier in 16bit mode
@@ -125,9 +133,9 @@ begin
 
 -- SPDIF 44.1kHz source
   SP44: gen_spdif
-    generic map (Freq => 44100)
+    generic map (FREQ => 44100)
     port map (reset => wb_rst_o,
-            spdif => spdif_rx_i);
+              spdif => spdif_rx_i);
   
 -- Main test process
   MAIN: process
@@ -169,19 +177,38 @@ begin
     wb_cti_o <= "000";
     wb_adr_o <= (others => '0');
     wb_dat_o <= (others => '0');
-    wait for 60 ns;
+    wait for 200 ns;
     wb_rst_o <= '0';
     message("Start with checking version register for correct value:");
-    wb_check_16(16#1000#, 16#0101#);
+    wb_check_16(RX_VERSION, 16#0101#);
+    message("Enable interrupt on lock:");
+    wb_write_16(RX_INTMASK, 16#0001#);
     message("Enable receiver:");
-    wb_write_16(16#1001#, 16#0001#);
-    wb_read_16(16#1001#, read_16bit);
+    wb_write_16(RX_CONFIG, 16#0005#);
+    wb_read_16(RX_CONFIG, read_16bit);
+    wait_for_event("Wait for LOCK interrupt", 60 us, rx_int_o);
+    message("Check status register:");
+    wb_check_16(RX_STATUS, 16#0001#);
+    message("Clear interrupt:");
+    wb_write_16(RX_INTSTAT, 16#0001#);
+    wb_check_16(RX_INTSTAT, 16#0000#);
+    signal_check("rx_int_o", '0', rx_int_o);
+    message("Enable sample buffer");
+    wb_write_16(RX_CONFIG, 16#0007#);
+    message("Enable sample buffer interrupts");
+    wb_write_16(RX_INTMASK, 16#0007#);
+    wait_for_event("Wait for LSBF interrupt", 750 us, rx_int_o);
+    message("Check LSBF interrupt, and read some data");
+    wb_check_16(RX_INTSTAT, 16#0002#);
+    wb_write_16(RX_INTSTAT, 16#0002#);
+    wb_check_16(RX_INTSTAT, 16#0000#);
+    signal_check("rx_int_o", '0', rx_int_o);
+    wb_read_16(16#1080#, read_16bit);
+    wb_read_16(16#1081#, read_16bit);
+    wb_read_16(16#1082#, read_16bit);
+    wb_read_16(16#1083#, read_16bit);
     
-    -- lots of stuff coming here soon...
-    
-    
-    
-    wait for 100 us;
+    wait for 1 ms;
     report "End of simulation! (ignore this failure)"
       severity failure;
     wait;

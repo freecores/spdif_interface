@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/06/16 19:02:28  gedra
+-- Added frame decoder
+--
 -- Revision 1.2  2004/06/13 18:10:20  gedra
 -- Renamed generic
 --
@@ -53,8 +56,8 @@
 --
 --
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 entity tb_gen_spdif is             
   
@@ -63,7 +66,7 @@ end tb_gen_spdif;
 architecture behav of tb_gen_spdif is  
 
   component spdif_source             
-    generic (Freq: natural);            -- Sampling frequency in Hz
+    generic (FREQ: natural);            -- Sampling frequency in Hz
     port (                              -- Bitrate is 64x sampling frequency
       reset: in std_logic;
       spdif: out std_logic);            -- Output bi-phase encoded signal
@@ -197,7 +200,7 @@ begin
     reset <= '1';
     wait for 200 ns;
     reset <= '0';
-    wait for 200 us;
+    wait for 200 ms;
   end process;
 
   -- assuming a 33MHz Wishbone bus clock

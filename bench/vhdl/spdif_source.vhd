@@ -45,13 +45,16 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/06 15:45:24  gedra
+-- Cleaned up lint warnings.
+--
 -- Revision 1.1  2004/06/03 17:45:18  gedra
 -- SPDIF signal generator.
 --
 --
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 entity spdif_source is             
   generic (FREQ: natural);            -- Sampling frequency in Hz
@@ -66,9 +69,9 @@ architecture behav of spdif_source is
   constant Y_Preamble : std_logic_vector(7 downto 0) := "11100100";
   constant Z_Preamble : std_logic_vector(7 downto 0) := "11101000";
   signal clk, ispdif: std_logic;
-  signal fcnt : integer;              -- frame counter
-  signal bcnt : integer;              -- subframe bit counter
-  signal pcnt : integer;
+  signal fcnt : natural range 0 to 191;   -- frame counter
+  signal bcnt : natural range 0 to 63;    -- subframe bit counter
+  signal pcnt : natural range 0 to 63;  -- parity counter
   signal toggle : integer range 0 to 1;
   -- Channel A: sinewave with frequency=Freq/12
   type sine16 is array (0 to 15) of std_logic_vector(15 downto 0);
@@ -82,7 +85,7 @@ architecture behav of spdif_source is
                                (x"8000"), (x"257d"), (x"0000"), (x"257d"));
   signal channel_status: std_logic_vector(0 to 191);
 
-begin  
+begin
 
   spdif <= ispdif;
   channel_status <= (others => '0');
@@ -91,10 +94,11 @@ begin
   SGEN: process (clk, reset)
   begin  
     if reset = '1' then                   
-      fcnt <= 188;      -- start just before block to shorten simulation
+      fcnt <= 184;      -- start just before block to shorten simulation
       bcnt <= 0;
       toggle <= 0;
       ispdif <= '0';
+      pcnt <= 0;
     elsif rising_edge(clk) then
       if toggle = 1 then
         -- frame counter: 0 to 191

@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/26 14:11:39  gedra
+-- Converter to numeric_std and added hex functions
+--
 -- Revision 1.1  2004/06/24 19:26:02  gedra
 -- Wishbone bus utilities.
 --
@@ -97,7 +100,17 @@ package wb_tb_pack is
     signal wb_ack_i: in std_logic);
 
   procedure message (
-    constant MSG: in string);
+    constant MSG: in string);           -- message to be printed
+
+  procedure wait_for_event (
+    constant MSG : in string;           -- message
+    constant TIMEOUT: in time;          -- timeout
+    signal trigger: in std_logic);      -- trigger expression
+
+  procedure signal_check (
+    constant MSG : in string;           -- signal name
+    constant VALUE: in std_logic;       -- expected value
+    signal sig: in std_logic);        -- signal to check
 
 end wb_tb_pack;
 
@@ -407,13 +420,60 @@ package body wb_tb_pack is
 -- display a message with time stamp
   procedure message (
     constant MSG: in string) is
-  variable txt : line;
+    variable txt : line;
   begin
     write(txt, "@");
     write(txt, now, right, 12);
     write(txt, " -- " & MSG);
     writeline(OUTPUT, txt);
   end;  
-  
+
+-- wait for event to happen, with timeout
+  procedure wait_for_event (
+    constant MSG : in string;           -- message
+    constant TIMEOUT: in time;            -- timeout
+    signal trigger: in std_logic) is    -- trigger signal
+    variable txt : line;
+    variable t1 : time;
+  begin
+    t1 := now;
+    wait on trigger for timeout;
+    write(txt, "@");
+    write(txt, now, right, 12);
+    write(txt, " ");
+    write(txt, MSG);
+    if now - t1 >= TIMEOUT then
+      write(txt, " - Timed out!");
+    else
+      write(txt, " - OK!");
+    end if;  
+    writeline(OUTPUT, txt);
+  end;
+
+-- check signal value
+  procedure signal_check (
+    constant MSG : in string;           -- signal name
+    constant VALUE: in std_logic;       -- expected value
+    signal sig: in std_logic) is      -- signal to check
+    variable txt : line;
+  begin
+    write(txt, "@");
+    write(txt, now, right, 12);
+    write(txt, " ");
+    write(txt, MSG);
+    write(txt, " ");
+    if sig = VALUE then
+      write(txt, "verified to be ");
+    else
+      write(txt, "has incorrect value! Expected ");
+    end if;
+    if VALUE = '1' then
+      write(txt, "1!");
+    else
+      write(txt, "0!");
+    end if;
+    writeline(OUTPUT, txt);
+  end;
+    
 end wb_tb_pack;
 
