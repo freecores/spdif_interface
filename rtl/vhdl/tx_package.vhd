@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/07/14 17:58:49  gedra
+-- Added new components.
+--
 -- Revision 1.1  2004/07/13 18:30:25  gedra
 -- Transmitter component declarations.
 --
@@ -151,6 +154,36 @@ package tx_package is
       wb_dat_i: in std_logic_vector(15 downto 0);  -- data
       buf_data_a: out std_logic_vector(191 downto 0);
       buf_data_b: out std_logic_vector(191 downto 0));
+  end component;
+
+  component tx_encoder 
+    generic (DATA_WIDTH: integer range 16 to 32;
+             ADDR_WIDTH: integer range 8 to 64); 
+    port (
+      wb_clk_i: in std_logic;             -- clock
+      conf_mode: in std_logic_vector(3 downto 0);   -- sample format
+      conf_ratio: in std_logic_vector(7 downto 0);  -- clock divider
+      conf_udaten: in std_logic_vector(1 downto 0);  -- user data control
+      conf_chsten: in std_logic_vector(1 downto 0);  -- ch. status control
+      conf_txdata: in std_logic;          -- sample data enable
+      conf_txen: in std_logic;            -- spdif signal enable
+      user_data_a: in std_logic_vector(191 downto 0);  -- ch. a user data
+      user_data_b: in std_logic_vector(191 downto 0);  -- ch. b user data
+      ch_stat_a: in std_logic_vector(191 downto 0);  -- ch. a status
+      ch_stat_b: in std_logic_vector(191 downto 0);  -- ch. b status
+      chstat_freq: in std_logic_vector(1 downto 0);  -- sample freq.
+      chstat_gstat: in std_logic;         -- generation status
+      chstat_preem: in std_logic;         -- preemphasis status
+      chstat_copy: in std_logic;          -- copyright bit
+      chstat_audio: in  std_logic;        -- data format
+      sample_data: in std_logic_vector(DATA_WIDTH - 1 downto 0);  -- audio data
+      mem_rd: out std_logic;              -- sample buffer read
+      sample_addr: out std_logic_vector(ADDR_WIDTH - 2 downto 0);  -- address
+      evt_lcsbf: out std_logic;           -- lower ch.st./user data buf empty 
+      evt_hcsbf: out std_logic;           -- higher ch.st/user data buf empty 
+      evt_hsbf: out std_logic;            -- higher sample buf empty event
+      evt_lsbf: out std_logic;            -- lower sample buf empty event
+      spdif_tx_o: out std_logic);
   end component;
   
 end tx_package;
