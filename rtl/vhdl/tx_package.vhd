@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/07/13 18:30:25  gedra
+-- Transmitter component declarations.
+--
 -- 
 --
  
@@ -53,10 +56,7 @@ use ieee.std_logic_1164.all;
 
 package tx_package is
 
--- type declarations
-  type bus_array is array (0 to 7) of std_logic_vector(31 downto 0);
-
--- components
+-- components used in the transmitter
   
   component gen_control_reg 	 
     generic (DATA_WIDTH: integer;
@@ -127,9 +127,30 @@ package tx_package is
       intstat_rd: out std_logic;          -- Interrupt status register read
       intstat_wr: out std_logic;          -- Interrupt status register read
       mem_wr: out std_logic;              -- Sample memory write
-      mem_addr: out std_logic_vector(ADDR_WIDTH - 2 downto 0); -- mem. addr.
-      user_data_wr: out std_logic_vector(23 downto 0);  -- User data write
-      ch_status_wr: out std_logic_vector(23 downto 0));  -- Ch. status write
+      user_data_wr: out std_logic;        -- User data write
+      ch_status_wr: out std_logic);       -- Ch. status write
+  end component;
+
+  component tx_ver_reg 
+    generic (DATA_WIDTH: integer;
+             ADDR_WIDTH: integer;
+             USER_DATA_BUF: integer;
+             CH_STAT_BUF: integer);
+    port (
+      ver_rd: in std_logic; -- version register read
+      ver_dout: out std_logic_vector(DATA_WIDTH - 1 downto 0));
+  end component;
+
+  component tx_bitbuf 
+    generic (ENABLE_BUFFER: integer range 0 to 1); 
+    port (
+      wb_clk_i: in std_logic;             -- clock
+      wb_rst_i: in std_logic;             -- reset
+      buf_wr: in std_logic;               -- buffer write strobe
+      wb_adr_i: in std_logic_vector(4 downto 0);  -- address
+      wb_dat_i: in std_logic_vector(15 downto 0);  -- data
+      buf_data_a: out std_logic_vector(191 downto 0);
+      buf_data_b: out std_logic_vector(191 downto 0));
   end component;
   
 end tx_package;
