@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/07/13 18:29:50  gedra
+-- Transmitter Wishbone bus cycle decoder.
+--
 --
 --
 
@@ -78,9 +81,8 @@ entity tx_wb_decoder is
     intstat_rd: out std_logic;          -- Interrupt status register read
     intstat_wr: out std_logic;          -- Interrupt status register read
     mem_wr: out std_logic;              -- Sample memory write
-    mem_addr: out std_logic_vector(ADDR_WIDTH - 2 downto 0); -- mem. addr.
-    user_data_wr: out std_logic_vector(23 downto 0);  -- User data write
-    ch_status_wr: out std_logic_vector(23 downto 0));  -- Ch. status write
+    user_data_wr: out std_logic;  -- User data write
+    ch_status_wr: out std_logic); -- Ch. status write
 end tx_wb_decoder;
 
 architecture rtl of tx_wb_decoder is
@@ -92,7 +94,7 @@ architecture rtl of tx_wb_decoder is
   constant REG_TXINTSTAT : std_logic_vector(6 downto 0) := "0000100";
   signal iack, iwr, ird : std_logic;
   signal acnt: integer range 0 to 2**(ADDR_WIDTH - 1) - 1;
-  signal all_ones : std_logic_vector(ADDR_WIDTH - 1 downto 0);
+  --signal all_ones : std_logic_vector(ADDR_WIDTH - 1 downto 0);
   signal rdout : std_logic_vector(DATA_WIDTH - 1 downto 0);
   
 begin 
@@ -164,10 +166,7 @@ begin
       rdout <= data_out;
     end if;
   end process DREG;
-  
--- sample memory write address. 
-  mem_addr <= wb_adr_i(ADDR_WIDTH - 2 downto 0);
-   
+     
 -- read and write strobe generation
   
   version_rd <= '1' when wb_adr_i(6 downto 0) = REG_TXVERSION and ird = '1'
@@ -191,13 +190,12 @@ begin
   mem_wr <= '1' when wb_adr_i(ADDR_WIDTH - 1) = '1' and iwr = '1' else '0';
 
 -- user data/ch. status register write strobes
-  UDRS: for k in 0 to 23 generate
-    user_data_wr(k) <= '1' when iwr = '1' and wb_adr_i(6) = '0' and
-                       wb_adr_i(5 downto 0) = std_logic_vector(to_unsigned(16+k,6))
-                       else '0';
-    ch_status_wr(k) <= '1' when iwr = '1' and
-                       wb_adr_i(6 downto 0) = std_logic_vector(to_unsigned(48+k,7))
-                       else '0';
-  end generate UDRS;
+  user_data_wr <= '1' when iwr = '1' and
+                  to_integer(unsigned(wb_adr_i)) > 15 and
+                  to_integer(unsigned(wb_adr_i)) < 40 else '0';
+                       
+  ch_status_wr <= '1' when iwr = '1' and
+                  to_integer(unsigned(wb_adr_i)) > 47 and
+                  to_integer(unsigned(wb_adr_i)) < 72 else '0';
   
 end rtl;
