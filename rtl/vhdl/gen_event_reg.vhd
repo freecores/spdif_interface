@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/04 15:55:07  gedra
+-- Cleaned up lint warnings.
+--
 -- Revision 1.1  2004/06/03 17:49:26  gedra
 -- Generic event register. Used in both receiver and transmitter.
 --
@@ -73,7 +76,7 @@ architecture rtl of gen_event_reg is
   signal evt_internal, zero: std_logic_vector(DATA_WIDTH - 1 downto 0);
 
 begin
-	
+
   evt_dout <= evt_internal when evt_rd = '1' else (others => '0');
   zero <= (others => '0');
   
@@ -84,7 +87,8 @@ begin
   IR: process (clk)
   begin 
     if rising_edge(clk) then
-      if ((evt_internal and evt_mask) /= zero) and evt_wr = '0' and evt_en = '1' then
+      if ((evt_internal and evt_mask) /= zero) and evt_wr = '0'
+        and evt_en = '1' then
         evt_irq <= '1';
       else
         evt_irq <= '0';

@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/04 15:55:07  gedra
+-- Cleaned up lint warnings.
+--
 -- Revision 1.1  2004/06/03 17:47:17  gedra
 -- Generic control register. Used in both recevier and transmitter.
 --
@@ -56,8 +59,9 @@ use IEEE.std_logic_arith.all;
 
 entity gen_control_reg is	 
   generic (DATA_WIDTH: integer;
-           ACTIVE_BIT_MASK: std_logic_vector); -- note that this vector is (0 to xx),
-  port (                                       -- reverse order
+           -- note that this vector is (0 to xx), reverse order
+           ACTIVE_BIT_MASK: std_logic_vector); 
+  port (                                        
     clk: in std_logic;	 -- clock  
     rst: in std_logic; -- reset
     ctrl_wr: in std_logic; -- control register write	

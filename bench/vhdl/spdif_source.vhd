@@ -45,13 +45,16 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/03 17:45:18  gedra
+-- SPDIF signal generator.
+--
 --
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
 entity spdif_source is             
-  generic (Freq: natural);            -- Sampling frequency in Hz
+  generic (FREQ: natural);            -- Sampling frequency in Hz
   port (                              -- Bitrate is 64x sampling frequency
     reset: in std_logic;
     spdif: out std_logic);            -- Output bi-phase encoded signal
@@ -88,7 +91,7 @@ begin
   SGEN: process (clk, reset)
   begin  
     if reset = '1' then                   
-      fcnt <= 189;                        -- start just before block to shorten simulation
+      fcnt <= 188;      -- start just before block to shorten simulation
       bcnt <= 0;
       toggle <= 0;
       ispdif <= '0';
@@ -197,7 +200,7 @@ begin
   
 -- Clock process, generate a clock based on the desired sampling frequency    
   CLKG: process 
-    variable t1: time := 1.0e12/real(freq*256) * 1 ps;
+    variable t1: time := 1.0e12/real(FREQ*256) * 1 ps;
   begin
     clk <= '0';  
     wait for t1;
