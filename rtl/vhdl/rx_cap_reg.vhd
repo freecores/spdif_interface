@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/26 14:14:47  gedra
+-- Converted to numeric_std and fixed a few bugs.
+--
 -- Revision 1.1  2004/06/05 17:16:46  gedra
 -- Channel status/user data capture register
 --
@@ -63,7 +66,7 @@ entity rx_cap_reg is
     cap_ctrl_rd: in std_logic; -- control register read
     cap_data_rd: in std_logic;          -- data register read
     cap_din: in std_logic_vector(31 downto 0); -- write data
-    frame_rst: in std_logic; -- start of frame signal
+    rx_block_start: in std_logic; -- start of block signal
     ch_data: in std_logic;  -- channel status/user data
     ud_a_en: in std_logic;            -- user data ch. A enable
     ud_b_en: in std_logic;              -- user data ch. B enable
@@ -119,7 +122,7 @@ begin
         if rising_edge(clk) then
           if bitlen > 0 then    -- bitlen = 0 disables the capture function
             -- bit counter, 0 to 191
-            if frame_rst = '1' then
+            if rx_block_start = '1' then
               cur_pos <= 0;
               cap_len <= 0;
               cap_new <= (others => '0');

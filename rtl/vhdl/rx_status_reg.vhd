@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/06/26 14:14:47  gedra
+-- Converted to numeric_std and fixed a few bugs.
+--
 -- Revision 1.2  2004/06/16 19:03:10  gedra
 -- Added channel status decoding.
 --
@@ -63,7 +66,7 @@ entity rx_status_reg is
     status_rd: in std_logic;            -- status register read
     lock: in std_logic;                 -- signal lock status
     chas: in std_logic;                 -- channel A or B select
-    rx_frame_start: in std_logic;       -- start of frame signal
+    rx_block_start: in std_logic;       -- start of block signal
     ch_data: in std_logic;              -- channel status/user data
     cs_a_en: in std_logic;              -- channel status ch. A enable
     cs_b_en: in std_logic;              -- channel status ch. B enable
@@ -96,7 +99,7 @@ begin
       else
         if rising_edge(wb_clk_i) then
           -- bit counter, 0 to 191
-          if rx_frame_start = '1' then
+          if rx_block_start = '1' then
             cur_pos <= 0;
           elsif cs_b_en = '1' then -- ch. status #2 comes last, count then
             cur_pos <= cur_pos + 1;

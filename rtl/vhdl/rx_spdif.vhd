@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/26 14:13:56  gedra
+-- Top level entity for receiver.
+--
 --
 
 library IEEE;
@@ -208,7 +211,7 @@ begin
       status_rd => status_rd,
       lock => lock,
       chas => conf_chas,
-      rx_frame_start => rx_frame_start,
+      rx_block_start => rx_block_start,
       ch_data => rx_data,
       cs_a_en => cs_a_en,
       cs_b_en => cs_b_en,
@@ -283,7 +286,7 @@ begin
         cap_din => wb_dat_i,
         cap_dout => cap_dout(k),
         cap_evt => istat_cap(k),
-        frame_rst => rx_frame_start,
+        rx_block_start => rx_block_start,
         ch_data => rx_data,
         ud_a_en => ud_a_en,
         ud_b_en => ud_b_en,

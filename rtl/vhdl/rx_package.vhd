@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.7  2004/06/26 14:14:47  gedra
+-- Converted to numeric_std and fixed a few bugs.
+--
 -- Revision 1.6  2004/06/23 18:10:17  gedra
 -- Added Wishbone bus cycle decoder.
 --
@@ -104,7 +107,7 @@ package rx_package is
       status_rd: in std_logic;            -- status register read
       lock: in std_logic;                 -- signal lock status
       chas: in std_logic;                 -- channel A or B select
-      rx_frame_start: in std_logic;       -- start of frame signal
+      rx_block_start: in std_logic;       -- start of block signal
       ch_data: in std_logic;              -- channel status/user data
       cs_a_en: in std_logic;              -- channel status ch. A enable
       cs_b_en: in std_logic;              -- channel status ch. B enable
@@ -134,7 +137,7 @@ package rx_package is
       cap_ctrl_rd: in std_logic; -- control register read
       cap_data_rd: in std_logic;          -- data register read
       cap_din: in std_logic_vector(31 downto 0); -- write data
-      frame_rst: in std_logic; -- start of frame signal
+      rx_block_start: in std_logic; -- start of block signal
       ch_data: in std_logic;  -- channel status/user data
       ud_a_en: in std_logic;            -- user data ch. A enable
       ud_b_en: in std_logic;              -- user data ch. B enable
