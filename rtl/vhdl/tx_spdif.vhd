@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/07/20 17:41:25  gedra
+-- Cleaned up synthesis warnings.
+--
 -- Revision 1.1  2004/07/19 17:00:38  gedra
 -- SPDIF transmitter top level.
 --
@@ -111,6 +114,7 @@ begin
 
 -- Data bus or'ing 
     data_out <= version_dout or config_dout or intmask_dout or intstat_dout
+                or chstat_dout
                 when wb_adr_i(ADDR_WIDTH - 1) = '0' else (others => '0');
 
 -- Wishbone bus cycle decoder
