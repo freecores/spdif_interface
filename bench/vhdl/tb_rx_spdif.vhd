@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/07/11 16:20:16  gedra
+-- Improved test bench.
+--
 -- Revision 1.1  2004/06/26 14:12:51  gedra
 -- Top level test bench for receiver. NB! Not complete.
 --
@@ -207,8 +210,14 @@ begin
     wb_read_16(16#1081#, read_16bit);
     wb_read_16(16#1082#, read_16bit);
     wb_read_16(16#1083#, read_16bit);
+    wait_for_event("Wait for HSBF interrupt", 750 us, rx_int_o);
+    message("Check HSBF interrupt, and read some data");
+    wb_check_16(RX_INTSTAT, 16#0004#);
+    wb_write_16(RX_INTSTAT, 16#0004#);
+    wb_check_16(RX_INTSTAT, 16#0000#);
+    signal_check("rx_int_o", '0', rx_int_o);
     
-    wait for 1 ms;
+ 
     report "End of simulation! (ignore this failure)"
       severity failure;
     wait;

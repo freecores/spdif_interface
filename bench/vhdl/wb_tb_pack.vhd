@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/07/11 16:20:16  gedra
+-- Improved test bench.
+--
 -- Revision 1.2  2004/06/26 14:11:39  gedra
 -- Converter to numeric_std and added hex functions
 --
@@ -60,8 +63,9 @@ use std.textio.all;
 
 package wb_tb_pack is
 
-  constant WRITE_TIMEOUT : integer := 20;  -- Max cycles to wait during write operation
-  constant READ_TIMEOUT : integer := 20;  -- Max cycles to wait during read operation
+  constant WRITE_TIMEOUT : integer := 20;  -- Max cycles to wait during write
+  constant READ_TIMEOUT : integer := 20;  -- Max cycles to wait during read
+  constant TIME_WIDTH : integer := 15;  -- Number of chars for time field
 
   function int_2_hex (value: natural; width: natural) return string;
   function slv_2_hex (value: std_logic_vector) return string;
@@ -231,7 +235,7 @@ package body wb_tb_pack is
     -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
     write(txt, "@");
-    write(txt, now, right, 12);
+    write(txt, now, right, TIME_WIDTH);
     write(txt, " Wrote ");
     write(txt, int_2_hex(DATA, dat_width));
     write(txt, " to addr. ");
@@ -297,7 +301,7 @@ package body wb_tb_pack is
     -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
     write(txt, "@");
-    write(txt, now, right, 12);
+    write(txt, now, right, TIME_WIDTH);
     wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
     wb_we_o <= '0';
     wb_cyc_o <= '1';
@@ -368,7 +372,7 @@ package body wb_tb_pack is
     -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
     write(txt, "@");
-    write(txt, now, right, 12);
+    write(txt, now, right, TIME_WIDTH);
     wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
     wb_we_o <= '0';
     wb_cyc_o <= '1';
@@ -423,7 +427,7 @@ package body wb_tb_pack is
     variable txt : line;
   begin
     write(txt, "@");
-    write(txt, now, right, 12);
+    write(txt, now, right, TIME_WIDTH);
     write(txt, " -- " & MSG);
     writeline(OUTPUT, txt);
   end;  
@@ -439,7 +443,7 @@ package body wb_tb_pack is
     t1 := now;
     wait on trigger for timeout;
     write(txt, "@");
-    write(txt, now, right, 12);
+    write(txt, now, right, TIME_WIDTH);
     write(txt, " ");
     write(txt, MSG);
     if now - t1 >= TIMEOUT then
@@ -458,7 +462,7 @@ package body wb_tb_pack is
     variable txt : line;
   begin
     write(txt, "@");
-    write(txt, now, right, 12);
+    write(txt, now, right, TIME_WIDTH);
     write(txt, " ");
     write(txt, MSG);
     write(txt, " ");
