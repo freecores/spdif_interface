@@ -45,7 +45,10 @@
 --
 -- CVS Revision History
 --
--- $Log: not supported by cvs2svn $                        
+-- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/13 18:07:47  gedra
+-- Frame decoder and sample extractor
+--                        
 --
 
 library ieee;
@@ -74,7 +77,7 @@ entity rx_decode is
     rx_channel_a: in std_logic; 
     wr_en: out std_logic;
     wr_addr: out std_logic_vector(ADDR_WIDTH - 2 downto 0);
-    wr_data: out std_logic_vector(DATA_WIDTH downto 0);
+    wr_data: out std_logic_vector(DATA_WIDTH -1 downto 0);
     stat_paritya: out std_logic;
     stat_parityb: out std_logic;
     stat_lsbf: out std_logic;
@@ -93,9 +96,6 @@ architecture rtl of rx_decode is
   signal valid, next_is_a, blk_start : std_logic;
   
 begin
-
--- sample buffer address
-  wr_addr <= CONV_STD_LOGIC_VECTOR(adr_cnt, ADDR_WIDTH - 1);
   
 -- output data
   OD32: if DATA_WIDTH = 32 generate
@@ -128,6 +128,7 @@ begin
             sampst <= CHA_SYNC;
           end if;
         when CHA_SYNC =>
+          wr_addr <= CONV_STD_LOGIC_VECTOR(adr_cnt, ADDR_WIDTH - 1);
           wr_en <= '0';
           bit_cnt <= 0;
           valid <= '0';
@@ -147,6 +148,7 @@ begin
         when GET_SAMP =>
           tmp_stat(0) <= blk_start;
           if rx_data_en = '1' then
+            bit_cnt <= bit_cnt + 1;
             -- audio part
             if bit_cnt >= samp_start and bit_cnt <= 23 then
               tmp_data(bit_cnt - samp_start) <= rx_data;
@@ -182,10 +184,11 @@ begin
                 null;
             end case;
             -- parity: count number of 1's
-            par_cnt <= par_cnt + 1;
+            if rx_data = '1' then
+              par_cnt <= par_cnt + 1;
+            end if;
           end if;
-          bit_cnt <= bit_cnt + 1;
-          if bit_cnt = 27 then
+          if bit_cnt = 28 then
             sampst <= PAR_CHK;
           end if;
         when PAR_CHK =>
