@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.4  2004/07/12 17:06:08  gedra
+-- Test bench update.
+--
 -- Revision 1.3  2004/07/11 16:20:16  gedra
 -- Improved test bench.
 --
@@ -234,11 +237,11 @@ package body wb_tb_pack is
     end if;
     -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
-    write(txt, "@");
+    write(txt, string'("@"));
     write(txt, now, right, TIME_WIDTH);
-    write(txt, " Wrote ");
+    write(txt, string'(" Wrote "));
     write(txt, int_2_hex(DATA, dat_width));
-    write(txt, " to addr. ");
+    write(txt, string'(" to addr. "));
     write(txt, int_2_hex(ADDRESS, adr_width));
     wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
     wb_dat_o <= std_logic_vector(to_unsigned(DATA, wb_dat_o'length));
@@ -300,7 +303,7 @@ package body wb_tb_pack is
     end if;
     -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
-    write(txt, "@");
+    write(txt, string'("@"));
     write(txt, now, right, TIME_WIDTH);
     wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
     wb_we_o <= '0';
@@ -324,9 +327,9 @@ package body wb_tb_pack is
     end if;
     --READ_DATA := wb_dat_i;
     if tout = 0 then
-      write(txt, " Read ");
+      write(txt, string'(" Read "));
       write(txt, slv_2_hex(wb_dat_i));
-      write(txt, " from addr. ");
+      write(txt, string'(" from addr. "));
       write(txt, int_2_hex(ADDRESS, adr_width));
       writeline(OUTPUT, txt);
     end if;
@@ -371,7 +374,7 @@ package body wb_tb_pack is
     end if;
     -- start cycle on positive edge
     wait until rising_edge(wb_clk_i);
-    write(txt, "@");
+    write(txt, string'("@"));
     write(txt, now, right, TIME_WIDTH);
     wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
     wb_we_o <= '0';
@@ -395,17 +398,17 @@ package body wb_tb_pack is
     end if;
     if tout = 0 then
       if wb_dat_i = std_logic_vector(to_unsigned(EXP_DATA, wb_dat_i'length)) then
-        write(txt, " Check ");
+        write(txt, string'(" Check "));
         write(txt, slv_2_hex(wb_dat_i));
-        write(txt, " at addr. ");
+        write(txt, string'(" at addr. "));
         write(txt, int_2_hex(ADDRESS, adr_width));
-        write(txt, " - OK!");
+        write(txt, string'(" - OK!"));
       else
-        write(txt, " Check failed at addr. ");
+        write(txt, string'(" Check failed at addr. "));
         write(txt, int_2_hex(ADDRESS, adr_width));
-        write(txt, "! Got ");
+        write(txt, string'("! Got "));
         write(txt, slv_2_hex(wb_dat_i));
-        write(txt, ", expected ");
+        write(txt, string'(", expected "));
         write(txt, int_2_hex(EXP_DATA, dat_width));
       end if;
         writeline(OUTPUT, txt);
@@ -426,9 +429,9 @@ package body wb_tb_pack is
     constant MSG: in string) is
     variable txt : line;
   begin
-    write(txt, "@");
+    write(txt, string'("@"));
     write(txt, now, right, TIME_WIDTH);
-    write(txt, " -- " & MSG);
+    write(txt, string'(" -- ") & MSG);
     writeline(OUTPUT, txt);
   end;  
 
@@ -442,14 +445,14 @@ package body wb_tb_pack is
   begin
     t1 := now;
     wait on trigger for timeout;
-    write(txt, "@");
+    write(txt, string'("@"));
     write(txt, now, right, TIME_WIDTH);
-    write(txt, " ");
+    write(txt, string'(" "));
     write(txt, MSG);
     if now - t1 >= TIMEOUT then
-      write(txt, " - Timed out!");
+      write(txt, string'(" - Timed out!"));
     else
-      write(txt, " - OK!");
+      write(txt, string'(" - OK!"));
     end if;  
     writeline(OUTPUT, txt);
   end;
@@ -461,20 +464,20 @@ package body wb_tb_pack is
     signal sig: in std_logic) is      -- signal to check
     variable txt : line;
   begin
-    write(txt, "@");
+    write(txt, string'("@"));
     write(txt, now, right, TIME_WIDTH);
-    write(txt, " ");
+    write(txt, string'(" "));
     write(txt, MSG);
-    write(txt, " ");
+    write(txt, string'(" "));
     if sig = VALUE then
-      write(txt, "verified to be ");
+      write(txt, string'("verified to be "));
     else
-      write(txt, "has incorrect value! Expected ");
+      write(txt, string'("has incorrect value! Expected "));
     end if;
     if VALUE = '1' then
-      write(txt, "1!");
+      write(txt, string'("1!"));
     else
-      write(txt, "0!");
+      write(txt, string'("0!"));
     end if;
     writeline(OUTPUT, txt);
   end;
