@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.4  2004/06/13 18:08:09  gedra
+-- Added frame decoder and sample extractor
+--
 -- Revision 1.3  2004/06/10 18:57:36  gedra
 -- Cleaned up lint warnings.
 --
@@ -91,9 +94,15 @@ package rx_package is
   component rx_status_reg 	 
     generic (DATA_WIDTH: integer);
     port (
+      wb_clk_i: in std_logic;             -- clock
       status_rd: in std_logic;            -- status register read
-      status_vector: in std_logic_vector(DATA_WIDTH - 1 downto 0); 
-      status_dout: out std_logic_vector(DATA_WIDTH - 1 downto 0)); 
+      lock: in std_logic;                 -- signal lock status
+      chas: in std_logic;                 -- channel A or B select
+      rx_frame_start: in std_logic;       -- start of frame signal
+      ch_data: in std_logic;              -- channel status/user data
+      cs_a_en: in std_logic;              -- channel status ch. A enable
+      cs_b_en: in std_logic;              -- channel status ch. B enable
+      status_dout: out std_logic_vector(DATA_WIDTH - 1 downto 0));
   end component;
 
   component gen_event_reg 	 
