@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.4  2004/07/11 16:19:50  gedra
+-- Bug-fix.
+--
 -- Revision 1.3  2004/06/26 14:14:47  gedra
 -- Converted to numeric_std and fixed a few bugs.
 --
@@ -128,6 +131,9 @@ begin
       stat_lsbf <= '0';
       stat_hsbf <= '0';
       valid <= '0';
+      bit_cnt <= 0;
+      sampst <= IDLE;
+      tmp_stat <= (others => '0');
     elsif rising_edge(wb_clk_i) then
       --extract and store samples
       case sampst is

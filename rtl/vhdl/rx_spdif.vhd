@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.5  2004/07/19 16:58:37  gedra
+-- Fixed bug.
+--
 -- Revision 1.4  2004/07/12 17:06:41  gedra
 -- Fixed bug with lock event generation.
 --
@@ -102,15 +105,15 @@ architecture rtl of rx_spdif is
   signal imask_bits, imask_dout: std_logic_vector(DATA_WIDTH - 1 downto 0);
   signal imask_rd, imask_wr : std_logic;
   signal istat_dout, istat_events: std_logic_vector(DATA_WIDTH - 1 downto 0);
-  signal istat_rd, istat_wr : std_logic;
-  signal istat_lock, istat_lsbf, istat_hsbf, istat_paritya, istat_parityb: std_logic;
+  signal istat_rd, istat_wr, istat_lock : std_logic;
+  signal istat_lsbf, istat_hsbf, istat_paritya, istat_parityb: std_logic;
   signal istat_cap : std_logic_vector(7 downto 0);
   signal ch_st_cap_rd, ch_st_cap_wr, ch_st_data_rd: std_logic_vector(7 downto 0); 
   signal cap_dout : bus_array;
   signal ch_data, ud_a_en, ud_b_en, cs_a_en, cs_b_en: std_logic;
   signal mem_rd, sample_wr : std_logic;
   signal sample_din, sample_dout : std_logic_vector(DATA_WIDTH - 1 downto 0);
-  signal sbuf_wr_adr : std_logic_vector(ADDR_WIDTH - 2 downto 0);
+  signal sbuf_wr_adr, sbuf_rd_adr : std_logic_vector(ADDR_WIDTH - 2 downto 0);
   signal lock, rx_frame_start: std_logic;
   signal rx_data, rx_data_en, rx_block_start: std_logic;
   signal rx_channel_a, rx_error, lock_evt: std_logic;
@@ -156,6 +159,7 @@ begin
       intstat_rd => istat_rd,
       intstat_wr => istat_wr,
       mem_rd => mem_rd,
+      mem_addr => sbuf_rd_adr,
       ch_st_cap_rd => ch_st_cap_rd,
       ch_st_cap_wr => ch_st_cap_wr,
       ch_st_data_rd => ch_st_data_rd);
@@ -203,6 +207,11 @@ begin
         ctrl_din => wb_dat_i,
         ctrl_dout => conf_dout,
         ctrl_bits => conf_bits);
+    conf_mode(3 downto 0) <= "0000";
+    conf_paren <= '0';
+    conf_staten <= '0';
+    conf_useren <= '0';
+    conf_valen <= '0';
   end generate CG16; 
   conf_blken <= conf_bits(5);
   conf_valid <= conf_bits(4);
@@ -322,7 +331,7 @@ begin
       wr_en => sample_wr,
       rd_en => mem_rd,
       wr_addr => sbuf_wr_adr,
-      rd_addr => wb_adr_i(ADDR_WIDTH - 2 downto 0),
+      rd_addr => sbuf_rd_adr,
       dout => sample_dout);
 
 -- phase decoder

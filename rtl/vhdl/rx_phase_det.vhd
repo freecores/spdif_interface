@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.5  2004/07/19 16:58:37  gedra
+-- Fixed bug.
+--
 -- Revision 1.4  2004/07/12 17:06:41  gedra
 -- Fixed bug with lock event generation.
 --
@@ -125,6 +128,11 @@ begin
       trans <= '0';
       valid <= '0';
       preamble <= (ZERO, ZERO, ZERO, ZERO);
+      max_thres <= 0;
+      min_thres <= 0;
+      new_preamble <= NONE;
+      ztrans <= '0';
+      new_pulse <= '0';
     else
       if rising_edge(wb_clk_i) then
         -- sync spdif signal to wishbone clock
@@ -241,6 +249,11 @@ begin
       cs_b_en <= '0';
       rx_error <= '0';
       lock_evt <= '0';
+      bit_cnt <= 0;
+      pre_cnt <= 0;
+      short_idx <= '0';
+      frame_cnt <= 0;
+      last_preamble <= NONE;
     elsif rising_edge(wb_clk_i) then
       zilock <= ilock;
       if zilock /= ilock then           -- generate event for event reg.

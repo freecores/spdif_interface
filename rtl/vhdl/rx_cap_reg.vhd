@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.4  2004/07/19 16:58:37  gedra
+-- Fixed bug.
+--
 -- Revision 1.3  2004/06/27 16:16:55  gedra
 -- Signal renaming and bug fix.
 --
@@ -119,6 +122,9 @@ begin
         cur_pos <= 0;
         cap_len <= 0;
         cap_evt <= '0';
+        compared <= '0';
+        bitpos <= 0;
+        bitlen <= 0;
       else
         if rising_edge(clk) then
           bitlen <= to_integer(unsigned(cap_ctrl_bits(5 downto 0)));

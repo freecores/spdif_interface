@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/07/19 17:00:38  gedra
+-- SPDIF transmitter top level.
+--
 --
 --
 
@@ -280,11 +283,13 @@ begin
       evt_mask => intmask_bits,
       evt_en => conf_tinten,
       evt_irq => tx_int_o);
-  intstat_events(1) <= evt_lsbf;        -- lower sample buffer empty
-  intstat_events(2) <= evt_hsbf;        -- higher sampel buffer empty
-  intstat_events(3) <= evt_lcsbf;       -- lower ch.stat/user data buf empty
-  intstat_events(4) <= evt_hcsbf;       -- higher ch.stat7user data buf empty
-
+    intstat_events(0) <= '0';
+    intstat_events(1) <= evt_lsbf;        -- lower sample buffer empty
+    intstat_events(2) <= evt_hsbf;        -- higher sampel buffer empty
+    intstat_events(3) <= evt_lcsbf;       -- lower ch.stat/user data buf empty
+    intstat_events(4) <= evt_hcsbf;       -- higher ch.stat7user data buf empty
+    intstat_events(DATA_WIDTH - 1 downto 5) <= (others => '0');
+    
 -- Sample buffer memory
   MEM: dpram
     generic map (
