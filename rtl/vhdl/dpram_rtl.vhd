@@ -48,33 +48,36 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/09 19:24:31  gedra
+-- Generic dual port ram model.
+--
 --
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL; 
+library ieee;
+use ieee.std_logic_1164.all; 
 use ieee.std_logic_unsigned.all;
 
 entity dpram is
   generic (DATA_WIDTH: positive;
-           ADDR_WIDTH: positive);
+           RAM_WIDTH: positive);
   port (
     clk: in std_logic;
     rst: in std_logic; -- reset is optional, not used here
     din: in std_logic_vector(DATA_WIDTH - 1 downto 0);
     wr_en: in std_logic;
     rd_en: in std_logic;
-    wr_addr: in std_logic_vector(ADDR_WIDTH - 1 downto 0);
-    rd_addr: in std_logic_vector(ADDR_WIDTH - 1 downto 0);
+    wr_addr: in std_logic_vector(RAM_WIDTH - 1 downto 0);
+    rd_addr: in std_logic_vector(RAM_WIDTH - 1 downto 0);
     dout: out std_logic_vector(DATA_WIDTH - 1 downto 0));
 end dpram;    
 
 --library synplify; -- uncomment this line when using Synplify       
 architecture rtl of dpram is
 
-  type memory_type is array (2**ADDR_WIDTH - 1 downto 0) of
+  type memory_type is array (2**RAM_WIDTH - 1 downto 0) of
     std_logic_vector(DATA_WIDTH - 1 downto 0);
   signal memory: memory_type;  
-  signal lrd_addr: std_logic_vector(ADDR_WIDTH - 1 downto 0);   
+  signal lrd_addr: std_logic_vector(RAM_WIDTH - 1 downto 0);   
 -- Enable syn_ramstyle attribute when using Xilinx to enable block ram
 -- otherwise you get embedded CLB ram.
 -- attribute syn_ramstyle : string;

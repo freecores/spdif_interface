@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/09 19:24:50  gedra
+-- Added dual port ram.
+--
 -- Revision 1.1  2004/06/07 18:06:00  gedra
 -- Receiver component declarations.
 --
@@ -144,15 +147,15 @@ package rx_package is
 
   component dpram
     generic (DATA_WIDTH: positive;
-             ADDR_WIDTH: positive);
+             RAM_WIDTH: positive);
     port (
       clk: in std_logic;
       rst: in std_logic; -- reset is optional, not used here
       din: in std_logic_vector(DATA_WIDTH - 1 downto 0);
       wr_en: in std_logic;
       rd_en: in std_logic;
-      wr_addr: in std_logic_vector(ADDR_WIDTH - 1 downto 0);
-      rd_addr: in std_logic_vector(ADDR_WIDTH - 1 downto 0);
+      wr_addr: in std_logic_vector(RAM_WIDTH - 1 downto 0);
+      rd_addr: in std_logic_vector(RAM_WIDTH - 1 downto 0);
       dout: out std_logic_vector(DATA_WIDTH - 1 downto 0));
   end component; 
   
