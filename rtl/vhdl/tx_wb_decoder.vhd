@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/07/14 17:59:28  gedra
+-- Changed write signal for status buffers.
+--
 -- Revision 1.1  2004/07/13 18:29:50  gedra
 -- Transmitter Wishbone bus cycle decoder.
 --
@@ -191,11 +194,11 @@ begin
 
 -- user data/ch. status register write strobes
   user_data_wr <= '1' when iwr = '1' and
-                  to_integer(unsigned(wb_adr_i)) > 15 and
-                  to_integer(unsigned(wb_adr_i)) < 40 else '0';
+                  to_integer(unsigned(wb_adr_i)) > 31 and
+                  to_integer(unsigned(wb_adr_i)) < 56 else '0';
                        
   ch_status_wr <= '1' when iwr = '1' and
-                  to_integer(unsigned(wb_adr_i)) > 47 and
-                  to_integer(unsigned(wb_adr_i)) < 72 else '0';
+                  to_integer(unsigned(wb_adr_i)) > 63 and
+                  to_integer(unsigned(wb_adr_i)) < 88 else '0';
   
 end rtl;
