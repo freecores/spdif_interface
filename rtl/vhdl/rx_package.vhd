@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.5  2004/06/16 19:03:45  gedra
+-- Changed status reg. declaration
+--
 -- Revision 1.4  2004/06/13 18:08:09  gedra
 -- Added frame decoder and sample extractor
 --
@@ -198,6 +201,37 @@ package rx_package is
       stat_parityb: out std_logic;
       stat_lsbf: out std_logic;
       stat_hsbf: out std_logic);
+  end component;
+
+  component rx_wb_decoder
+    generic (DATA_WIDTH: integer;
+             ADDR_WIDTH: integer);
+    port (
+      wb_clk_i: in std_logic;             -- wishbone clock
+      wb_rst_i: in std_logic;             -- reset signal
+      wb_sel_i: in std_logic;             -- select input
+      wb_stb_i: in std_logic;             -- strobe input
+      wb_we_i: in std_logic;              -- write enable
+      wb_cyc_i: in std_logic;             -- cycle input
+      wb_bte_i: in std_logic_vector(1 downto 0);  -- burts type extension
+      wb_adr_i: in std_logic_vector(ADDR_WIDTH - 1 downto 0);  -- address
+      wb_cti_i: in std_logic_vector(2 downto 0);  -- cycle type identifier
+      data_out: in std_logic_vector(DATA_WIDTH - 1 downto 0); -- internal bus
+      wb_ack_o: out std_logic;            -- acknowledge
+      wb_dat_o: out std_logic_vector(DATA_WIDTH - 1 downto 0);  -- data out
+      version_rd: out std_logic;          -- Version register read 
+      config_rd: out std_logic;           -- Config register read
+      config_wr: out std_logic;           -- Config register write
+      status_rd: out std_logic;           -- Status register read
+      intmask_rd: out std_logic;          -- Interrupt mask register read
+      intmask_wr: out std_logic;          -- Interrupt mask register write
+      intstat_rd: out std_logic;          -- Interrupt status register read
+      intstat_wr: out std_logic;          -- Interrupt status register read
+      mem_rd: out std_logic;              -- Sample memory read
+      mem_addr: out std_logic_vector(ADDR_WIDTH - 2 downto 0);  -- memory addr.
+      ch_st_cap_rd: out std_logic_vector(7 downto 0);  -- Ch. status cap. read
+      ch_st_cap_wr: out std_logic_vector(7 downto 0);  -- Ch. status cap. write
+      ch_st_data_rd: out std_logic_vector(7 downto 0)); -- Ch. status data read
   end component;
   
 end rx_package;
