@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/07/11 16:19:50  gedra
+-- Bug-fix.
+--
 -- Revision 1.2  2004/06/27 16:16:55  gedra
 -- Signal renaming and bug fix.
 --
@@ -107,7 +110,7 @@ architecture rtl of rx_spdif is
   signal sbuf_wr_adr : std_logic_vector(ADDR_WIDTH - 2 downto 0);
   signal lock, rx_frame_start: std_logic;
   signal rx_data, rx_data_en, rx_block_start: std_logic;
-  signal rx_channel_a, rx_error: std_logic;
+  signal rx_channel_a, rx_error, lock_evt: std_logic;
 
 begin
 
@@ -265,7 +268,7 @@ begin
       evt_mask => imask_bits,
       evt_en => evt_en,
       evt_irq => rx_int_o);
-  istat_events(0) <= lock;
+  istat_events(0) <= lock_evt;
   istat_events(1) <= istat_lsbf;
   istat_events(2) <= istat_hsbf;
   istat_events(3) <= istat_paritya;
@@ -328,6 +331,7 @@ begin
       rxen => conf_rxen,
       spdif => spdif_rx_i,
       lock => lock,
+      lock_evt => lock_evt,
       rx_data => rx_data,
       rx_data_en => rx_data_en,
       rx_block_start => rx_block_start,

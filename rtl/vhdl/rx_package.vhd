@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.8  2004/06/27 16:16:55  gedra
+-- Signal renaming and bug fix.
+--
 -- Revision 1.7  2004/06/26 14:14:47  gedra
 -- Converted to numeric_std and fixed a few bugs.
 --
@@ -154,6 +157,7 @@ package rx_package is
       rxen: in std_logic;
       spdif: in std_logic;
       lock: out std_logic;
+      lock_evt: out std_logic;            -- lock status change event
       rx_data: out std_logic;
       rx_data_en: out std_logic;
       rx_block_start: out std_logic;

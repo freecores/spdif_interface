@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/07/11 16:19:50  gedra
+-- Bug-fix.
+--
 -- Revision 1.2  2004/06/13 18:08:50  gedra
 -- Renamed generic and cleaned some lint's
 --
@@ -64,6 +67,7 @@ entity rx_phase_det is
     rxen: in std_logic;                 -- phase detector enable
     spdif: in std_logic;                -- SPDIF input signal
     lock: out std_logic;                -- true if locked to spdif input
+    lock_evt: out std_logic;            -- lock status change event
     rx_data: out std_logic;             -- recevied data
     rx_data_en: out std_logic;          -- received data enable
     rx_block_start: out std_logic;      -- start-of-block pulse
@@ -97,7 +101,7 @@ architecture rtl of rx_phase_det is
   signal pre_cnt : integer range 0 to 7;
   type preamble_types is (NONE, PRE_X, PRE_Y, PRE_Z);
   signal new_preamble, last_preamble : preamble_types;
-  signal irx_channel_a : std_logic;
+  signal irx_channel_a, zilock : std_logic;
   
 begin
 
@@ -213,13 +217,14 @@ begin
 
   lock <= ilock;
   rx_channel_a <= irx_channel_a;
-  
+    
   -- State machine that hunt for and lock onto sub-frames
   FRX: process (wb_clk_i, rxen)
-  begin  -- process FRX
+  begin  
     if rxen = '0' then                  
       framerx <= IDLE;
       ilock <= '0';
+      zilock <= '0';
       rx_data <= '0';
       rx_data_en <= '0';
       rx_block_start <= '0';
@@ -230,7 +235,14 @@ begin
       cs_a_en <= '0';
       cs_b_en <= '0';
       rx_error <= '0';
-    elsif rising_edge(wb_clk_i) then  
+      lock_evt <= '0';
+    elsif rising_edge(wb_clk_i) then
+      zilock <= ilock;
+      if zilock /= ilock then           -- generate event for event reg.
+        lock_evt <= '1';
+      else
+        lock_evt <= '0';
+      end if;
       case framerx is
         when  IDLE =>                   -- wait for recevier to be enabled
           if valid = '1' then
