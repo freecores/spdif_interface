@@ -45,12 +45,15 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/23 18:09:57  gedra
+-- Wishbone bus cycle decoder.
+--
 --
 
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
---use ieee.std_logic_unsigned.all;
+use ieee.std_logic_unsigned.all;
 
 entity rx_wb_decoder is	 
   generic (DATA_WIDTH: integer;
@@ -93,6 +96,7 @@ architecture rtl of rx_wb_decoder is
   signal iack, iwr, ird : std_logic;
   signal acnt: integer range 0 to 2**(ADDR_WIDTH - 1) - 1;
   signal all_ones : std_logic_vector(ADDR_WIDTH - 1 downto 0);
+  signal rdout : std_logic_vector(DATA_WIDTH - 1 downto 0);
   
 begin 
 
@@ -153,14 +157,23 @@ begin
 
 -- read generation
   ird <= '1' when wb_cyc_i = '1' and wb_sel_i = '1' and wb_stb_i = '1' and
-         wb_we_i = '0' else '0'; 
+         wb_we_i = '0' else '0';
 
+  wb_dat_o <= data_out when wb_adr_i(ADDR_WIDTH - 1) = '1' else rdout;
+
+  DREG: process (wb_clk_i)              -- clock data from registers
+  begin 
+    if rising_edge(wb_clk_i) then
+      rdout <= data_out;
+    end if;
+  end process DREG;
+  
 -- sample memory read address. This needs special attention due to read latency
   mem_addr <= CONV_STD_LOGIC_VECTOR(acnt, ADDR_WIDTH - 1) when
               wb_cti_i = "010" and wb_we_i = '0' and iack = '1' and
               wb_bte_i = "00" else wb_adr_i(ADDR_WIDTH - 2 downto 0);
   
-  all_ones <= (others => '1');
+  all_ones(ADDR_WIDTH - 1 downto 0) <= (others => '1');
   
   SMA: process (wb_clk_i, wb_rst_i)
   begin               
