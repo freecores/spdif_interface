@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/13 18:08:50  gedra
+-- Renamed generic and cleaned some lint's
+--
 -- Revision 1.1  2004/06/06 15:43:02  gedra
 -- Early version of the bi-phase mark decoder.
 --
@@ -75,7 +78,7 @@ end rx_phase_det;
 
 architecture rtl of rx_phase_det is
 
-  constant TRANSITIONS : integer := 40;
+  constant TRANSITIONS : integer := 70;
   constant FRAMES_FOR_LOCK : integer := 3;
   signal maxpulse, maxp, mp_cnt: integer range 0 to 16 * WISHBONE_FREQ;
   signal last_cnt, max_thres : integer range 0 to 16 * WISHBONE_FREQ;

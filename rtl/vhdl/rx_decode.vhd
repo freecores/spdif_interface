@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/06/26 14:14:47  gedra
+-- Converted to numeric_std and fixed a few bugs.
+--
 -- Revision 1.2  2004/06/16 19:04:09  gedra
 -- Fixed a few bugs.
 --
@@ -116,12 +119,15 @@ begin
       adr_cnt <= 0;
       next_is_a <= '1';
       wr_en <= '0';
+      wr_addr <= (others => '0');
+      tmp_data <= (others => '0');
       par_cnt <= 0;
       blk_start <= '0';
       stat_paritya <= '0';
       stat_parityb <= '0';
       stat_lsbf <= '0';
       stat_hsbf <= '0';
+      valid <= '0';
     elsif rising_edge(wb_clk_i) then
       --extract and store samples
       case sampst is
@@ -196,7 +202,7 @@ begin
           end if;
         when PAR_CHK =>
           blk_start <= '0';
-          if (valid = '0' and conf_valen = '1') or conf_valen = '0' then
+          if (valid = '0' and conf_valid = '1') or conf_valid = '0' then
             wr_en <= '1';
           end if;
           -- parity check
@@ -237,7 +243,7 @@ begin
                   0 when conf_mode = "1000" else
                   8;
   end generate M32;
--- in 16bit mode onyl 16bit of audio is supported 
+-- in 16bit mode only 16bit of audio is supported 
   M16: if DATA_WIDTH = 16 generate
     samp_start <= 8;
   end generate M16;

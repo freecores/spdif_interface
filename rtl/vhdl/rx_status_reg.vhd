@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.4  2004/06/27 16:16:55  gedra
+-- Signal renaming and bug fix.
+--
 -- Revision 1.3  2004/06/26 14:14:47  gedra
 -- Converted to numeric_std and fixed a few bugs.
 --
@@ -93,9 +96,10 @@ begin
 -- extract channel status bits to be used
   CDAT: process (wb_clk_i, lock)
     begin
-      if lock = '1' then
+      if lock = '0' then
         cur_pos <= 0;
         pro_mode <= '0';
+        status_vector(6 downto 1) <= (others => '0');
       else
         if rising_edge(wb_clk_i) then
           -- bit counter, 0 to 191

@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/06/27 16:16:55  gedra
+-- Signal renaming and bug fix.
+--
 -- Revision 1.1  2004/06/26 14:13:56  gedra
 -- Top level entity for receiver.
 --
@@ -83,7 +86,7 @@ architecture rtl of rx_spdif is
 
   signal data_out, ver_dout : std_logic_vector(DATA_WIDTH - 1 downto 0);
   signal ver_rd : std_logic;
-  signal conf_rxen, conf_sample, conf_rinten, conf_chas, conf_valid : std_logic;
+  signal conf_rxen, conf_sample, evt_en, conf_chas, conf_valid : std_logic;
   signal conf_blken, conf_valen, conf_useren, conf_staten : std_logic;
   signal conf_paren, config_rd, config_wr : std_logic;
   signal conf_mode : std_logic_vector(3 downto 0);
@@ -198,7 +201,7 @@ begin
   conf_blken <= conf_bits(5);
   conf_valid <= conf_bits(4);
   conf_chas <= conf_bits(3);
-  conf_rinten <= conf_bits(2);
+  evt_en <= conf_bits(2);
   conf_sample <= conf_bits(1);
   conf_rxen <= conf_bits(0);    
   
@@ -260,7 +263,7 @@ begin
       evt_dout => istat_dout,
       event => istat_events,
       evt_mask => imask_bits,
-      evt_en => conf_rinten,
+      evt_en => evt_en,
       evt_irq => rx_int_o);
   istat_events(0) <= lock;
   istat_events(1) <= istat_lsbf;

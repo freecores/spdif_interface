@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/06/06 15:42:20  gedra
+-- Cleaned up lint warnings.
+--
 -- Revision 1.2  2004/06/04 15:55:07  gedra
 -- Cleaned up lint warnings.
 --
@@ -74,6 +77,7 @@ end gen_event_reg;
 architecture rtl of gen_event_reg is
 
   signal evt_internal, zero: std_logic_vector(DATA_WIDTH - 1 downto 0);
+  signal zevent: std_logic_vector(DATA_WIDTH - 1 downto 0);
 
 begin
 
@@ -102,9 +106,11 @@ begin
     begin		 
       if rst = '1' then
         evt_internal(k) <= '0';
+        zevent(k) <= event(k);
       else
         if rising_edge(clk) then
-          if event(k) = '1' then	   -- set event
+          zevent(k) <= event(k);
+          if event(k) /= zevent(k) then	   -- set event
             evt_internal(k) <= '1';
           elsif evt_wr = '1' and evt_din(k) = '1' then -- clear event
             evt_internal(k) <= '0';	  
