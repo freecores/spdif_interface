@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.5  2004/07/15 17:43:53  gedra
+-- Added string type casting to make ModelSim happy.
+--
 -- Revision 1.4  2004/07/12 17:06:08  gedra
 -- Test bench update.
 --
@@ -67,8 +70,12 @@ use std.textio.all;
 package wb_tb_pack is
 
   constant WRITE_TIMEOUT : integer := 20;  -- Max cycles to wait during write
-  constant READ_TIMEOUT : integer := 20;  -- Max cycles to wait during read
-  constant TIME_WIDTH : integer := 15;  -- Number of chars for time field
+  constant READ_TIMEOUT : integer := 20;   -- Max cycles to wait during read
+  constant TIME_WIDTH : integer := 15;     -- Number of chars for time field
+
+  shared variable errors : integer := 0;  -- error counter during simulation
+  shared variable rd_tout : integer;    -- read timeout flag used by check()
+  shared variable no_print : integer := 0;  -- no print during check()
 
   function int_2_hex (value: natural; width: natural) return string;
   function slv_2_hex (value: std_logic_vector) return string;
@@ -86,7 +93,7 @@ package wb_tb_pack is
 
   procedure wb_read (
     constant ADDRESS: in natural;
-    variable READ_DATA : out std_logic_vector;
+    variable read_data: out std_logic_vector;
     signal wb_adr_o: out std_logic_vector;
     signal wb_dat_i: in std_logic_vector;
     signal wb_cyc_o: out std_logic;
@@ -118,6 +125,9 @@ package wb_tb_pack is
     constant MSG : in string;           -- signal name
     constant VALUE: in std_logic;       -- expected value
     signal sig: in std_logic);        -- signal to check
+
+  procedure sim_report (
+    constant MSG : in string);
 
 end wb_tb_pack;
 
@@ -273,7 +283,7 @@ package body wb_tb_pack is
 -- Classic Wishbone read cycle
   procedure wb_read (
     constant ADDRESS: in natural;
-    variable READ_DATA : out std_logic_vector;
+    variable read_data : out std_logic_vector;
     signal wb_adr_o: out std_logic_vector;
     signal wb_dat_i: in std_logic_vector;
     signal wb_cyc_o: out std_logic;
@@ -282,7 +292,6 @@ package body wb_tb_pack is
     signal wb_clk_i: in std_logic;
     signal wb_ack_i: in std_logic) is
     variable txt : line;
-    variable tout : integer;
     variable adr_width, dat_width : natural;
     constant WEAK_BUS: std_logic_vector(wb_adr_o'range) := (others => 'W');
   begin
@@ -311,27 +320,30 @@ package body wb_tb_pack is
     wb_sel_o <= '1';
     -- wait for acknowledge 
     wait until rising_edge(wb_clk_i);
-    tout := 0;
+    rd_tout := 0;
     if wb_ack_i /= '1' then
       for i in 1 to READ_TIMEOUT loop
         wait until rising_edge(wb_clk_i);
         exit when wb_ack_i = '1';
         if (i = READ_TIMEOUT) then
-          --write(txt, string'("- @ "));
-          --write(txt, now, right, DEFAULT_TIMEWIDTH, DEFAULT_TIMEBASE);
           write (txt, string'("Warning: WB_read timeout!"));
-          writeline(OUTPUT, txt);
-          tout := 1;
+          if no_print = 0 then
+            writeline(OUTPUT, txt);
+          end if;
+          rd_tout := 1;
+          errors := errors + 1;
         end if;    
       end loop;
     end if;
-    --READ_DATA := wb_dat_i;
-    if tout = 0 then
+    read_data := wb_dat_i;
+    if rd_tout = 0 then
       write(txt, string'(" Read "));
       write(txt, slv_2_hex(wb_dat_i));
       write(txt, string'(" from addr. "));
       write(txt, int_2_hex(ADDRESS, adr_width));
-      writeline(OUTPUT, txt);
+      if no_print = 0 then
+        writeline(OUTPUT, txt);
+      end if;
     end if;
     -- release bus
     wb_adr_o <= WEAK_BUS;
@@ -355,8 +367,12 @@ package body wb_tb_pack is
     variable tout : integer;
     variable adr_width, dat_width : natural;
     constant WEAK_BUS: std_logic_vector(wb_adr_o'range) := (others => 'W');
-    variable RData : std_logic_vector(wb_dat_i'left downto 0);
+    variable read_data : std_logic_vector(wb_dat_i'left downto 0);
   begin
+    no_print := 1;  --  stop read() from printing message
+    wb_read (ADDRESS, read_data, wb_adr_o, wb_dat_i, wb_cyc_o, wb_sel_o,
+             wb_we_o, wb_clk_i, wb_ack_i);
+    no_print := 0;
     -- determine best width for number printout
     if wb_adr_o'length < 9 then
       adr_width := 2;
@@ -371,33 +387,12 @@ package body wb_tb_pack is
       dat_width := 4;
     else
       dat_width := 8;
-    end if;
-    -- start cycle on positive edge
-    wait until rising_edge(wb_clk_i);
+    end if;    
     write(txt, string'("@"));
     write(txt, now, right, TIME_WIDTH);
-    wb_adr_o <= std_logic_vector(to_unsigned(ADDRESS, wb_adr_o'length));
-    wb_we_o <= '0';
-    wb_cyc_o <= '1';
-    wb_sel_o <= '1';
-    -- wait for acknowledge 
-    wait until rising_edge(wb_clk_i);
-    tout := 0;
-    if wb_ack_i /= '1' then
-      for i in 1 to READ_TIMEOUT loop
-        wait until rising_edge(wb_clk_i);
-        exit when wb_ack_i = '1';
-        if (i = READ_TIMEOUT) then
-          --write(txt, string'("- @ "));
-          --write(txt, now, right, DEFAULT_TIMEWIDTH, DEFAULT_TIMEBASE);
-          write (txt, string'(" Warning: WB_check timeout!"));
-          writeline(OUTPUT, txt);
-          tout := 1;
-        end if;    
-      end loop;
-    end if;
-    if tout = 0 then
-      if wb_dat_i = std_logic_vector(to_unsigned(EXP_DATA, wb_dat_i'length)) then
+    
+    if rd_tout = 0 then
+      if read_data = std_logic_vector(to_unsigned(EXP_DATA, wb_dat_i'length)) then
         write(txt, string'(" Check "));
         write(txt, slv_2_hex(wb_dat_i));
         write(txt, string'(" at addr. "));
@@ -410,18 +405,15 @@ package body wb_tb_pack is
         write(txt, slv_2_hex(wb_dat_i));
         write(txt, string'(", expected "));
         write(txt, int_2_hex(EXP_DATA, dat_width));
+        errors := errors + 1;
       end if;
         writeline(OUTPUT, txt);
+    else
+      write(txt, string'(" Read timeout from addr. "));
+      write(txt, int_2_hex(ADDRESS, adr_width));
+      write(txt, string'(" during check!"));
+      writeline(OUTPUT, txt);
     end if;
-    -- release bus
-    wb_adr_o <= WEAK_BUS;
-    wb_we_o <= 'L';
-    wb_cyc_o <= 'L';
-    wb_sel_o <= 'L';
-    --if RData /= EXP_DATA then
-    --  write (txt, string'("Error: WB_check failed!"));
-    --  writeline(OUTPUT, txt);
-    --end if;
   end;
 
 -- display a message with time stamp
@@ -451,6 +443,7 @@ package body wb_tb_pack is
     write(txt, MSG);
     if now - t1 >= TIMEOUT then
       write(txt, string'(" - Timed out!"));
+      errors := errors + 1;
     else
       write(txt, string'(" - OK!"));
     end if;  
@@ -473,6 +466,7 @@ package body wb_tb_pack is
       write(txt, string'("verified to be "));
     else
       write(txt, string'("has incorrect value! Expected "));
+      errors := errors + 1;
     end if;
     if VALUE = '1' then
       write(txt, string'("1!"));
@@ -481,6 +475,19 @@ package body wb_tb_pack is
     end if;
     writeline(OUTPUT, txt);
   end;
+
+-- Report number of errors encountered during simulation
+  procedure sim_report (
+    constant MSG : in string) is
+    variable txt : line;
+  begin
+    write(txt, string'("@"));
+    write(txt, now, right, TIME_WIDTH);
+    write(txt, string'(" Simulation completed with "));
+    write(txt, errors);
+    write(txt, string'(" errors!"));
+    writeline(OUTPUT, txt);
+  end;    
     
 end wb_tb_pack;
 
