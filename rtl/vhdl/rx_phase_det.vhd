@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.4  2004/07/12 17:06:41  gedra
+-- Fixed bug with lock event generation.
+--
 -- Revision 1.3  2004/07/11 16:19:50  gedra
 -- Bug-fix.
 --
@@ -117,7 +120,7 @@ begin
       spdif_in <= '0';
       trans_cnt <= 0;
       minpulse <= 0;
-      minp <= 0;
+      minp <= 8 * WISHBONE_FREQ;
       last_cnt <= 0;
       trans <= '0';
       valid <= '0';
@@ -130,15 +133,17 @@ begin
         -- find the longest pulse, which is the bi-phase violation
         -- also find the shortest pulse
         zspdif_in <= spdif_in;
-        if zspdif_in /= spdif_in then
+        if zspdif_in /= spdif_in then   -- input transition
           mp_cnt <= 0;
           trans <= '1';
           last_cnt <= mp_cnt;
-          if mp_cnt > maxp then
-            maxp <= mp_cnt;
-          end if;
-          if mp_cnt < minp then
-            minp <= mp_cnt;
+          if trans_cnt > 0 then
+            if mp_cnt > maxp then
+              maxp <= mp_cnt;
+            end if;
+            if mp_cnt < minp then
+              minp <= mp_cnt;
+            end if;
           end if;
         else
           trans <= '0';

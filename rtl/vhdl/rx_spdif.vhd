@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.4  2004/07/12 17:06:41  gedra
+-- Fixed bug with lock event generation.
+--
 -- Revision 1.3  2004/07/11 16:19:50  gedra
 -- Bug-fix.
 --
@@ -61,10 +64,10 @@ use IEEE.std_logic_1164.all;
 use work.rx_package.all;
 
 entity rx_spdif is	 
-  generic (DATA_WIDTH: integer range 16 to 32 := 16;
-           ADDR_WIDTH: integer range 8 to 64 := 8;
-           CH_ST_CAPTURE: integer range 0 to 8 := 0;
-           WISHBONE_FREQ: natural:= 33);
+  generic (DATA_WIDTH: integer range 16 to 32;
+           ADDR_WIDTH: integer range 8 to 64;
+           CH_ST_CAPTURE: integer range 0 to 8;
+           WISHBONE_FREQ: natural);
   port (
     -- Wishbone interface
     wb_clk_i: in std_logic;
@@ -122,7 +125,7 @@ begin
   DB32: if DATA_WIDTH = 32 generate
     data_out <= ver_dout or conf_dout or stat_dout or imask_dout or istat_dout or
                 cap_dout(1) or cap_dout(2) or cap_dout(3) or cap_dout(4) or
-                cap_dout(5) or cap_dout(6) or cap_dout(7) when
+                cap_dout(5) or cap_dout(6) or cap_dout(7) or cap_dout(0) when
                 wb_adr_i(ADDR_WIDTH - 1) = '0' else sample_dout;
   end generate DB32;
 
@@ -276,7 +279,7 @@ begin
   istat_events(15 downto 5) <= (others => '0');                             
   IS32: if DATA_WIDTH = 32 generate
     istat_events(23 downto 16) <= istat_cap(7 downto 0);
-    istat_events(32 downto 24) <= (others => '0');
+    istat_events(31 downto 24) <= (others => '0');
   end generate IS32;
 
 -- capture registers
@@ -301,7 +304,7 @@ begin
     end generate CAPR;
     -- unused capture registers set to zero
     UCAPR: if CH_ST_CAPTURE < 8 generate
-      UC: for k in CH_ST_CAPTURE - 1 to 7 generate
+      UC: for k in CH_ST_CAPTURE to 7 generate
         cap_dout(k) <= (others => '0');
       end generate UC;
     end generate UCAPR;

@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.3  2004/06/27 16:16:55  gedra
+-- Signal renaming and bug fix.
+--
 -- Revision 1.2  2004/06/26 14:14:47  gedra
 -- Converted to numeric_std and fixed a few bugs.
 --
@@ -104,10 +107,8 @@ begin
       ctrl_dout => cap_ctrl_dout,
       ctrl_bits => cap_ctrl_bits);
   
-  bitlen <= to_integer(unsigned(cap_ctrl_bits(5 downto 0)));
   chid <= cap_ctrl_bits(6);
   cdata <= cap_ctrl_bits(7);
-  bitpos <= to_integer(unsigned(cap_ctrl_bits(15 downto 8)));
   
 -- capture data register
   CDAT: process (clk, rst)
@@ -120,6 +121,8 @@ begin
         cap_evt <= '0';
       else
         if rising_edge(clk) then
+          bitlen <= to_integer(unsigned(cap_ctrl_bits(5 downto 0)));
+          bitpos <= to_integer(unsigned(cap_ctrl_bits(15 downto 8)));
           if bitlen > 0 then    -- bitlen = 0 disables the capture function
             -- bit counter, 0 to 191
             if rx_block_start = '1' then
@@ -135,26 +138,22 @@ begin
               case d_enable is
                 when "0001" =>          -- user data channel A
                   if cdata = '0' and chid = '0' then
-                    cap_new(0) <= ch_data;
-                    cap_new(31 downto 1) <= cap_new(30 downto 0);
+                    cap_new(cap_len) <= ch_data;
                     cap_len <= cap_len + 1;
                   end if;
                 when "0010" =>          -- user data channel B
                   if cdata = '0' and chid = '1' then
-                    cap_new(0) <= ch_data;
-                    cap_new(31 downto 1) <= cap_new(30 downto 0);
+                    cap_new(cap_len) <= ch_data;
                     cap_len <= cap_len + 1;
                   end if;
                 when "0100" =>          -- channel status ch. A
                   if cdata = '1' and chid = '0' then
-                    cap_new(0) <= ch_data;
-                    cap_new(31 downto 1) <= cap_new(30 downto 0);
+                    cap_new(cap_len) <= ch_data;
                     cap_len <= cap_len + 1;
                   end if;
                 when "1000" =>          -- channel status ch. B
                   if cdata = '1' and chid = '1' then
-                    cap_new(0) <= ch_data;
-                    cap_new(31 downto 1) <= cap_new(30 downto 0);
+                    cap_new(cap_len) <= ch_data;
                     cap_len <= cap_len + 1;
                   end if;
                 when others => null;

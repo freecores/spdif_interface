@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.2  2004/07/17 17:21:11  gedra
+-- Fixed bug.
+--
 -- Revision 1.1  2004/07/14 17:58:19  gedra
 -- Transmitter channel status buffer.
 --
@@ -69,6 +72,9 @@ end tx_bitbuf;
 
 architecture rtl of tx_bitbuf is
 
+  type buf_type is array (0 to 23) of std_logic_vector(7 downto 0);
+  signal buffer_a, buffer_b: buf_type;  
+  
 begin
 
   -- the byte buffer is 192 bits (24 bytes) for each channel 
@@ -76,17 +82,21 @@ begin
     WBUF: process (wb_clk_i, wb_rst_i)
     begin
       if wb_rst_i = '1' then
-        buf_data_a(191 downto 0) <= (others => '0');
-        buf_data_b(191 downto 0) <= (others => '0');
+        for i in 0 to 23 loop
+          buffer_a(i) <= (others => '0');
+          buffer_b(i) <= (others => '0');
+        end loop; 
       elsif rising_edge(wb_clk_i) then
         if buf_wr = '1' and to_integer(unsigned(wb_adr_i)) < 24 then
-          buf_data_a(8*to_integer(unsigned(wb_adr_i)) + 7 downto to
-                     8*to_integer(unsigned(wb_adr_i))) <= wb_dat_i(7 downto 0);
-          buf_data_b(8*to_integer(unsigned(wb_adr_i)) + 7 downto
-                     8*to_integer(unsigned(wb_adr_i))) <= wb_dat_i(15 downto 8);
+          buffer_a(to_integer(unsigned(wb_adr_i))) <= wb_dat_i(7 downto 0);
+          buffer_b(to_integer(unsigned(wb_adr_i))) <= wb_dat_i(15 downto 8);
         end if;
       end if;
     end process WBUF;
+    VGEN: for k in 0 to 23 generate
+      buf_data_a(8 * k + 7 downto 8 * k) <= buffer_a(k);
+      buf_data_b(8 * k + 7 downto 8 * k) <= buffer_b(k);
+    end generate VGEN;
   end generate EB;
   
   -- if the byte buffer is not enabled, set all bits to zero
