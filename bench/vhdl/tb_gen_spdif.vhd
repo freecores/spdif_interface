@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/06/06 15:44:19  gedra
+-- Simple test bench for rx_phase_det.vhd.
+--
 --
 
 LIBRARY ieee;
@@ -64,7 +67,7 @@ architecture behav of tb_gen_spdif is
   end component;
 
   component rx_phase_det
-  generic (WISH_BONE_FREQ: natural);            -- WishBone frequency in MHz
+  generic (WISHBONE_FREQ: natural);            -- WishBone frequency in MHz
   port (
     wb_clk_i: in std_logic;
     rxen: in std_logic;
@@ -100,7 +103,7 @@ begin
   -- SPDIF phase detector and decoder
   PD: rx_phase_det
     generic map (
-      WISH_BONE_FREQ => 33)
+      WISHBONE_FREQ => 33)
     port map (
       wb_clk_i => wb_clk_i,
       rxen     => rxen,
