@@ -46,6 +46,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.1  2004/07/19 16:59:08  gedra
+-- Transmitter SPDIF encoder.
+--
 --
 --
 
@@ -218,14 +221,13 @@ begin
         if imem_rd = '1' then
           if adr_cnt = 2**(ADDR_WIDTH - 2) - 1 then
             evt_lsbf <= '1';
-          else
-            evt_lsbf <= '0';
           end if;
           if adr_cnt = 2**(ADDR_WIDTH - 1) - 1 then
             evt_hsbf <= '1';
-          else
-            evt_hsbf <= '0';
           end if;
+        else
+          evt_lsbf <= '0';
+          evt_hsbf <= '0';
         end if;
       end if;
     end if;
