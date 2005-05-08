@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.6  2004/07/19 16:57:17  gedra
+-- Improved test bench package.
+--
 -- Revision 1.5  2004/07/15 17:43:53  gedra
 -- Added string type casting to make ModelSim happy.
 --
@@ -124,10 +127,15 @@ package wb_tb_pack is
   procedure signal_check (
     constant MSG : in string;           -- signal name
     constant VALUE: in std_logic;       -- expected value
-    signal sig: in std_logic);        -- signal to check
+    signal sig: in std_logic);          -- signal to check
 
   procedure sim_report (
     constant MSG : in string);
+
+  procedure vector_check (
+    constant MSG : in string;            -- signal name
+    constant VALUE: in std_logic_vector; -- expected value
+    signal sig: in std_logic_vector);    -- vector to check
 
 end wb_tb_pack;
 
@@ -487,7 +495,31 @@ package body wb_tb_pack is
     write(txt, errors);
     write(txt, string'(" errors!"));
     writeline(OUTPUT, txt);
-  end;    
+  end;
+
+-- check vector value
+  procedure vector_check (
+    constant MSG : in string;             -- signal name
+    constant VALUE: in std_logic_vector;  -- expected value
+    signal sig: in std_logic_vector) is   -- signal to check
+    variable txt : line;
+  begin
+    write(txt, string'("@"));
+    write(txt, now, right, TIME_WIDTH);
+    write(txt, string'(" "));
+    write(txt, MSG);
+    write(txt, string'(" "));
+    if sig = VALUE then
+      write(txt, string'("verified to be "));
+    else
+      write(txt, string'("has incorrect value! Expected "));
+      write(txt, slv_2_hex(VALUE));
+      write(txt, string'(", but got "));
+      errors := errors + 1;
+    end if;  
+    write(txt, slv_2_hex(sig));
+    writeline(OUTPUT, txt);
+  end;  
     
 end wb_tb_pack;
 
