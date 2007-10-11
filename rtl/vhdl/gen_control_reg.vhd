@@ -45,6 +45,9 @@
 -- CVS Revision History
 --
 -- $Log: not supported by cvs2svn $
+-- Revision 1.4  2004/06/26 14:14:47  gedra
+-- Converted to numeric_std and fixed a few bugs.
+--
 -- Revision 1.3  2004/06/06 15:42:19  gedra
 -- Cleaned up lint warnings.
 --
@@ -57,52 +60,52 @@
 --
 
 library ieee;
-use ieee.std_logic_1164.all; 
+use ieee.std_logic_1164.all;
 
-entity gen_control_reg is	 
-  generic (DATA_WIDTH: integer;
-           -- note that this vector is (0 to xx), reverse order
-           ACTIVE_BIT_MASK: std_logic_vector); 
-  port (                                        
-    clk: in std_logic;	 -- clock  
-    rst: in std_logic; -- reset
-    ctrl_wr: in std_logic; -- control register write	
-    ctrl_rd: in std_logic; -- control register read
-    ctrl_din: in std_logic_vector(DATA_WIDTH - 1 downto 0); -- write data
-    ctrl_dout: out std_logic_vector(DATA_WIDTH - 1 downto 0); -- read data
-    ctrl_bits: out std_logic_vector(DATA_WIDTH - 1 downto 0)); -- control bits
+entity gen_control_reg is
+   generic (DATA_WIDTH      : integer;
+            -- note that this vector is (0 to xx), reverse order
+            ACTIVE_BIT_MASK : std_logic_vector); 
+   port (
+      clk       : in  std_logic;        -- clock  
+      rst       : in  std_logic;        -- reset
+      ctrl_wr   : in  std_logic;        -- control register write  
+      ctrl_rd   : in  std_logic;        -- control register read
+      ctrl_din  : in  std_logic_vector(DATA_WIDTH - 1 downto 0);  -- write data
+      ctrl_dout : out std_logic_vector(DATA_WIDTH - 1 downto 0);  -- read data
+      ctrl_bits : out std_logic_vector(DATA_WIDTH - 1 downto 0));  -- control bits
 end gen_control_reg;
 
 architecture rtl of gen_control_reg is
 
-  signal ctrl_internal: std_logic_vector(DATA_WIDTH - 1 downto 0);
+   signal ctrl_internal : std_logic_vector(DATA_WIDTH - 1 downto 0);
 
 begin
 
-  ctrl_dout <= ctrl_internal when ctrl_rd = '1' else (others => '0');	  
-  ctrl_bits <= ctrl_internal;
-  
+   ctrl_dout <= ctrl_internal when ctrl_rd = '1' else (others => '0');
+   ctrl_bits <= ctrl_internal;
+
 -- control register generation
-  CTRLREG: for k in ctrl_din'range generate
-    -- active bits can be written to
-    ACTIVE: if  ACTIVE_BIT_MASK(k) = '1' generate   
-      CBIT: process (clk, rst)
-      begin		 
-        if rst = '1' then
-          ctrl_internal(k) <= '0';
-        else
-          if rising_edge(clk) then
-            if ctrl_wr = '1' then
-              ctrl_internal(k) <= ctrl_din(k);
+   CTRLREG : for k in ctrl_din'range generate
+      -- active bits can be written to
+      ACTIVE : if ACTIVE_BIT_MASK(k) = '1' generate
+         CBIT : process (clk, rst)
+         begin
+            if rst = '1' then
+               ctrl_internal(k) <= '0';
+            else
+               if rising_edge(clk) then
+                  if ctrl_wr = '1' then
+                     ctrl_internal(k) <= ctrl_din(k);
+                  end if;
+               end if;
             end if;
-          end if;	  
-        end if;
-      end process CBIT;			 	
-    end generate ACTIVE;
-    -- inactive bits are always 0
-    INACTIVE: if ACTIVE_BIT_MASK(k) = '0' generate  
-      ctrl_internal(k) <= '0';
-    end generate INACTIVE;
-  end generate CTRLREG;
-  
+         end process CBIT;
+      end generate ACTIVE;
+      -- inactive bits are always 0
+      INACTIVE : if ACTIVE_BIT_MASK(k) = '0' generate
+         ctrl_internal(k) <= '0';
+      end generate INACTIVE;
+   end generate CTRLREG;
+   
 end rtl;
